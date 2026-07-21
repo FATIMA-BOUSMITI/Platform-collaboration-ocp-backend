@@ -1,5 +1,6 @@
 package com.ocp.auth_service.service;
 
+import com.ocp.auth_service.dto.request.CreateRoleRequest;
 import com.ocp.auth_service.dto.request.UpdateRolePermissionsRequest;
 import com.ocp.auth_service.dto.response.RoleResponse;
 import com.ocp.auth_service.entity.Permission;
@@ -27,10 +28,10 @@ public class RoleService {
     private final RoleMapper roleMapper;
 
     @Transactional
-    public RoleResponse createRole(String name, String description) {
+    public RoleResponse createRole(CreateRoleRequest request) {
         Role role = new Role();
-        role.setName(name);
-        role.setDescription(description);
+        role.setName(request.getName());
+        role.setDescription(request.getDescription());
         Role savedRole = roleRepository.save(role);
         return roleMapper.toResponse(savedRole);
     }

@@ -36,7 +36,7 @@ public class UserService {
          throw new EmailAlreadyExistsException(request.getEmail());
      }
         UserCredential user= new UserCredential();
-        user.setId(UUID.randomUUID());
+        user.setUserId(UUID.randomUUID());
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(true);

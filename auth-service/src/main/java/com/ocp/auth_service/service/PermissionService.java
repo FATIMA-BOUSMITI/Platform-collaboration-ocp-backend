@@ -1,5 +1,6 @@
 package com.ocp.auth_service.service;
 
+import com.ocp.auth_service.dto.request.CreatePermissionRequest;
 import com.ocp.auth_service.dto.response.PermissionResponse;
 import com.ocp.auth_service.entity.Permission;
 import com.ocp.auth_service.exception.PermissionNotFoundException;
@@ -35,10 +36,10 @@ public class PermissionService {
     }
 
     @Transactional
-    public PermissionResponse createPermission(String name, String description) {
+    public PermissionResponse createPermission(CreatePermissionRequest request) {
         Permission permission = new Permission();
-        permission.setName(name);
-        permission.setDescription(description);
+        permission.setName(request.getName());
+        permission.setDescription(request.getDescription());
         Permission saved = permissionRepository.save(permission);
         return permissionMapper.toResponse(saved);
     }

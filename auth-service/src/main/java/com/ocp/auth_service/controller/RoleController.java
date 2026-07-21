@@ -1,5 +1,6 @@
 package com.ocp.auth_service.controller;
 
+import com.ocp.auth_service.dto.request.CreateRoleRequest;
 import com.ocp.auth_service.dto.response.RoleResponse;
 import com.ocp.auth_service.service.RoleService;
 import jakarta.validation.Valid;
@@ -19,8 +20,8 @@ public class RoleController {
     private final RoleService roleService ;
 
     @PostMapping
-    public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody String name, String description) {
-        RoleResponse response = roleService.createRole(name, description);
+    public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody CreateRoleRequest request) {
+        RoleResponse response = roleService.createRole(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
