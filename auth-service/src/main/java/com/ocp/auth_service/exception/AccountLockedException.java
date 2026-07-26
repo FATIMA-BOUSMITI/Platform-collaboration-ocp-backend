@@ -1,4 +1,8 @@
 package com.ocp.auth_service.exception;
 
-public class AccountLockedException {
+public class AccountLockedException extends RuntimeException {
+
+	public AccountLockedException(String message) {
+		super(message);
+	}
 }
