@@ -14,3 +14,4 @@ public class UpdateRolePermissionsRequest {
     @NotNull(message = "La liste des permissions est obligatoire")
     private Set<UUID> permissionIds;
 }
+
