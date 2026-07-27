@@ -11,6 +11,7 @@ import java.util.UUID;
 @Setter
 public class UpdateRolePermissionsRequest {
 
-	@NotNull(message = "La liste des permissions est obligatoire")
-	private Set<UUID> permissionIds;
+    @NotNull(message = "La liste des permissions est obligatoire")
+    private Set<UUID> permissionIds;
 }
+

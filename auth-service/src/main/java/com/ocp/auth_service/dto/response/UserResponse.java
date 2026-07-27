@@ -15,13 +15,13 @@ import java.util.UUID;
 
 public class UserResponse {
 
-	private UUID id;
-	private String email;
-	private Boolean enabled;
-	private Boolean accountLocked;
-	private LocalDateTime lastLogin;
-	private LocalDateTime createdAt;
-	private Set<String> roleNames;
+    private UUID id;
+    private String email;
+    private Boolean enabled;
+    private Boolean accountLocked;
+    private LocalDateTime lastLogin;
+    private LocalDateTime createdAt;
+    private Set<String> roleNames;
 
 
 

@@ -1,81 +1,62 @@
 package com.ocp.auth_service.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import jakarta.validation.constraints.Email;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_credentials")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EnableJpaAuditing
 public class UserCredential {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-	@Column(nullable = false, unique = true)
-	private UUID userId;
+    @Column(name = "user_id", nullable = false, unique = true)
+    private UUID userId;
 
-	@Column(nullable = false, unique = true, length = 150)
-	private String email;
+    @Email
+    @Column(nullable = false, unique = true, length = 150)
+    private String email;
 
-	@Column(nullable = false)
-	private String passwordHash;
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
 
-	@Column(nullable = false)
-	private Boolean enabled = true;
+    @Column(nullable = false)
+    private Boolean enabled;
 
-	@Column(nullable = false)
-	private Boolean accountLocked = false;
+    @Column(name = "account_locked", nullable = false)
+    private Boolean accountLocked;
 
-	@Column(nullable = false)
-	private Integer failedAttempts = 0;
+    @Column(name = "failed_attempts", nullable = false)
+    private Integer failedAttempts;
 
-	private LocalDateTime lastLogin;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
-	@PrePersist
-	public void prePersist() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-	@PreUpdate
-	public void preUpdate() {
-		this.updatedAt = LocalDateTime.now();
-	}
-	@Column(nullable = false)
-	private LocalDateTime createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-	@Column(nullable = false)
-	private LocalDateTime updatedAt;
-	@ManyToMany
-	@JoinTable(
-		name = "user_roles",
-		joinColumns = @JoinColumn(name = "user_credential_id"),
-		inverseJoinColumns = @JoinColumn(name = "role_id")
-	)
-	private Set<Role> roles = new HashSet<>();
-	@OneToMany(mappedBy = "user")
-
-
-
-	private List<LoginHistory> loginHistories = new ArrayList<>();
-	@OneToMany(mappedBy = "user")
-
-	private List<Session> session = new ArrayList<>();
-	@OneToMany(mappedBy = "user")
-	private List<RefreshToken> refeshTokens  =new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 }

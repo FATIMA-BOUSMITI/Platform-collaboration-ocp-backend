@@ -12,9 +12,9 @@ import java.util.UUID;
 @Setter
 
 public class AssignRoleRequest {
-	@NotNull(message = "L'identifiant de l'utilisateur est obligatoire")
-	private UUID userId;
+    @NotNull(message = "L'identifiant de l'utilisateur est obligatoire")
+    private UUID userId;
 
-	@NotEmpty(message = "Au moins un rôle doit être fourni")
-	private Set<UUID> roleIds;
+    @NotEmpty(message = "Au moins un rôle doit être fourni")
+    private Set<UUID> roleIds;
 }

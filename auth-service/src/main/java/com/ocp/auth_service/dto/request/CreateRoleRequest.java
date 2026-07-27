@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateRoleRequest {
-	@NotBlank(message = "Le nom du rôle est obligatoire")
-	private String name;
+    @NotBlank(message = "Le nom du rôle est obligatoire")
+    private String name;
 
-	private String description;
+    private String description;
 }

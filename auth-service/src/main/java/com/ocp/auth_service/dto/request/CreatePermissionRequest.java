@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 public class CreatePermissionRequest {
 
-	@NotBlank(message = "Le nom de la permission est obligatoire")
-	private String name;
+    @NotBlank(message = "Le nom de la permission est obligatoire")
+    private String name;
 
-	private String description;
+    private String description;
 }

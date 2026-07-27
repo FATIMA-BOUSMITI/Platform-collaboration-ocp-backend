@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class PermissionResponse {
+public class ErrorResponse {
 
-    private UUID id;
-    private String name;
-    private String description;
+    private LocalDateTime timestamp;
+    private int status;
+    private String message;
 }

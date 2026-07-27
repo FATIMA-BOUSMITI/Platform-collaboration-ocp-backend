@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 public class UpdateUserRequest {
 
-	@Email(message = "Format d'email invalide" )
-	private String email ;
+    @Email(message = "Format d'email invalide" )
+    private String email ;
 
-	private Boolean enabled;
-	private Boolean accountLocked;
+    private Boolean enabled;
+    private Boolean accountLocked;
 
 }
