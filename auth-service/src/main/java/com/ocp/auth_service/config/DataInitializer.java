@@ -1,43 +1,42 @@
 package com.ocp.auth_service.config;
-import com.ocp.auth_service.Repository.UserCredentialRepository;
-import com.ocp.auth_service.entity.UserCredential;
+
+import com.ocp.auth_service.entity.Permission;
+import com.ocp.auth_service.Repository.PermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import java.util.UUID;
+import org.springframework.stereotype.Component;
 
-@Configuration
+import java.util.List;
+
+@Component
 @RequiredArgsConstructor
+public class DataInitializer implements CommandLineRunner {
 
+    private final PermissionRepository permissionRepository;
 
+    @Override
+    public void run(String... args) {
+        seedPermission("USER_CREATE", "Créer un utilisateur");
+        seedPermission("USER_READ", "Consulter les utilisateurs");
+        seedPermission("USER_UPDATE", "Modifier un utilisateur");
+        seedPermission("USER_DELETE", "Supprimer un utilisateur");
 
-public class DataInitializer {
-	private final UserCredentialRepository userCredentialRepository;
-	private final PasswordEncoder passwordEncoder;
-	@Bean
-	CommandLineRunner init() {
+        seedPermission("ROLE_CREATE", "Créer un rôle");
+        seedPermission("ROLE_READ", "Consulter les rôles");
+        seedPermission("ROLE_UPDATE", "Modifier un rôle");
+        seedPermission("ROLE_DELETE", "Supprimer un rôle");
 
-		return args -> {
+        seedPermission("PERMISSION_READ", "Consulter les permissions");
+        seedPermission("PERMISSION_UPDATE", "Modifier les permissions");
+    }
 
-			if (userCredentialRepository.findByEmail("fatimabousmiti9@gmail.com").isEmpty()) {
-
-				UserCredential admin = UserCredential.builder()
-					.userId(UUID.randomUUID())
-					.email("fatimabousmiti9@gmail.com")
-					.passwordHash(passwordEncoder.encode("Admin123"))
-					.enabled(true)
-					.accountLocked(false)
-					.failedAttempts(0)
-					.build();
-
-				userCredentialRepository.save(admin);
-
-				System.out.println("Admin account created successfully");
-			}
-
-		};
-	}
+    private void seedPermission(String name, String description) {
+        if (permissionRepository.existsByName(name)) {
+            return;
+        }
+        Permission permission = new Permission();
+        permission.setName(name);
+        permission.setDescription(description);
+        permissionRepository.save(permission);
+    }
 }
-

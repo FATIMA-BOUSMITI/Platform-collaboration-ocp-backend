@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class RoleUserCountRespon {
+public class RoleUserCountResponse {
     private String roleName;
     private long userCount;
 }

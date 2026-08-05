@@ -1,4 +1,4 @@
-package com.ocp.auth_service.service;
+package com.ocp.auth_service.services;
 
 import com.ocp.auth_service.dto.request.CreatePermissionRequest;
 import com.ocp.auth_service.dto.response.PermissionResponse;

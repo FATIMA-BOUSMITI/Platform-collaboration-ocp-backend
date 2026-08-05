@@ -16,6 +16,7 @@ import com.ocp.auth_service.exception.InvalidCredentialsException;
 import com.ocp.auth_service.exception.UserNotFoundException;
 import com.ocp.auth_service.mappers.UserCredentialMapper;
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.lang.String;
@@ -23,18 +24,18 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
+@RequiredArgsConstructor
 @Service
 public class AuthService {
-	private  UserCredentialRepository userCredentialRepository;
-	private  UserCredentialMapper userCredentialMapper;
-	private  PasswordEncoder passwordEncoder;
-	private  JwtService jwtService;
-	private  RefreshTokenService refreshTokenService;
-	private RefreshTokenRepository refreshTokenRepository;
-	private PasswordResetTokenRepository passwordResetTokenRepository;
-	private EmailService emailService;
-    public AuthResponse login(LoginRequest loginRequest){
+	private  final UserCredentialRepository userCredentialRepository;
+	private final   PasswordEncoder passwordEncoder;
+	private final JwtService jwtService;
+	private final RefreshTokenService refreshTokenService;
+	private final RefreshTokenRepository refreshTokenRepository;
+	private final PasswordResetTokenRepository passwordResetTokenRepository;
+	private final EmailService emailService;
+
+    public  AuthResponse login(LoginRequest loginRequest){
 
 		 UserCredential user = userCredentialRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->  new UserNotFoundException("Email n'existe pas"));
 		  if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPasswordHash())){

@@ -24,7 +24,7 @@ public class AuthenticationController {
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponse> login(
 		@Valid @RequestBody LoginRequest request) {
-
+        System.out.println("==== LOGIN CONTROLLER APPELE ====");
 		AuthResponse response = authService.login(request);
 
 		return ResponseEntity.ok(response);

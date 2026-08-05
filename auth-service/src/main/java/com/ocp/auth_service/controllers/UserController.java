@@ -3,6 +3,7 @@ import com.ocp.auth_service.dto.request.AssignRoleRequest;
 import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.request.UpdateUserRequest;
 import com.ocp.auth_service.dto.response.UserResponse;
+import com.ocp.auth_service.dto.response.UserStatsResponse;
 import com.ocp.auth_service.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -57,4 +58,14 @@ public class UserController {
 		userService.deleteUser(id);
 		return ResponseEntity.noContent().build();
 	}
+    @GetMapping("/stats")
+    public ResponseEntity<UserStatsResponse> getStats(){
+        return ResponseEntity.ok(userService.getUserStats());
+    }
+
+    @GetMapping("/stats/failed-attempts/last-24h")
+    public ResponseEntity<Long> getFailedAttemptsLast24Hours() {
+        long count = userService.getFailedAttemptsLast24Hours();
+        return ResponseEntity.ok(count);
+    }
 }
