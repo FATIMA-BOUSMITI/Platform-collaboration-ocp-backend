@@ -1,7 +1,10 @@
 package com.ocp.auth_service.controllers;
 
 import com.ocp.auth_service.dto.request.CreateRoleRequest;
+import com.ocp.auth_service.dto.request.UpdateRolePermissionsRequest;
+import com.ocp.auth_service.dto.response.PermissionResponse;
 import com.ocp.auth_service.dto.response.RoleResponse;
+import com.ocp.auth_service.dto.response.RoleUserCountResponse;
 import com.ocp.auth_service.services.RoleService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -36,5 +39,23 @@ public class RoleController {
 		List<RoleResponse> responses = roleService.getAllRoles();
 		return ResponseEntity.ok(responses);
 	}
+
+
+    @GetMapping("/stats")
+    public ResponseEntity<List<RoleUserCountResponse>> getRoleStats() {
+        return ResponseEntity.ok(roleService.getUserCountsByRole());
+    }
+
+    @GetMapping("{id}/permissions")
+    public ResponseEntity<List<PermissionResponse>> getRolePermissions(@PathVariable UUID id) {
+        return ResponseEntity.ok(roleService.getRolePermissions(id));
+    }
+
+    @PutMapping("{id}/permissions")
+    public ResponseEntity<RoleResponse> updateRolePermissions( @PathVariable UUID id ,
+                                                               @Valid
+                                                               @RequestBody UpdateRolePermissionsRequest request){
+        return ResponseEntity.ok(roleService.updateRolePermissions(id,request));
+    }
 
 }

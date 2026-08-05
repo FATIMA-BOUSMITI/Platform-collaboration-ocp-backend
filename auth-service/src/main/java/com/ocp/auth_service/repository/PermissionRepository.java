@@ -1,4 +1,4 @@
-package com.ocp.auth_service.repository;
+package com.ocp.auth_service.Repository;
 
 import com.ocp.auth_service.entity.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,5 +9,5 @@ import java.util.UUID;
 
 public interface PermissionRepository extends JpaRepository<Permission, UUID> {
     Optional<Permission> findByName (String name);
-
+    boolean existsByName(String name );
 }
