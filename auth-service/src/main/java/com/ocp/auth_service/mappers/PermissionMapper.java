@@ -3,6 +3,7 @@ package com.ocp.auth_service.mappers;
 import com.ocp.auth_service.dto.response.PermissionResponse;
 import com.ocp.auth_service.entity.Permission;
 import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;

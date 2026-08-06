@@ -17,5 +17,6 @@ public interface SessionRepository
 
 	Session findByDevice(String device);
 	Session findByUserAgent(String device);
+    long countByActiveTrue();
 
 }

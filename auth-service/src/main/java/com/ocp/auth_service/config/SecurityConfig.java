@@ -1,7 +1,10 @@
 package com.ocp.auth_service.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,73 +13,42 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 public class SecurityConfig {
 
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
-
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-		http
-			.csrf(csrf -> csrf.disable())
-
-			// IMPORTANT
-			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**").permitAll()
-				.requestMatchers("/api/roles/**").permitAll()
-				.anyRequest().authenticated()
-			);
-
-		return http.build();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 
 
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
 
-		CorsConfiguration configuration = new CorsConfiguration();
+        http
 
-		configuration.setAllowedOrigins(
-			List.of("http://localhost:5173")
-		);
+                .cors(Customizer.withDefaults())
 
-		configuration.setAllowedMethods(
-			List.of(
-				"GET",
-				"POST",
-				"PUT",
-				"DELETE",
-				"OPTIONS"
-			)
-		);
+                .csrf(csrf -> csrf.disable())
 
-		configuration.setAllowedHeaders(
-			List.of("*")
-		);
+                .authorizeHttpRequests(auth -> auth
 
-		configuration.setAllowCredentials(true);
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        .requestMatchers("/api/roles/**").permitAll()
+
+                        .requestMatchers("/api/users/stats").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/permissions/**").permitAll()
 
 
-		UrlBasedCorsConfigurationSource source =
-			new UrlBasedCorsConfigurationSource();
+                        .anyRequest().authenticated()
 
-		source.registerCorsConfiguration(
-			"/**",
-			configuration
-		);
+                );
 
-		return source;
-	}
+        return http.build();
+    }
 
 }

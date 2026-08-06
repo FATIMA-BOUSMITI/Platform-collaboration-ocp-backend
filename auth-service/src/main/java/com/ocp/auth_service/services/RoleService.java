@@ -2,11 +2,14 @@ package com.ocp.auth_service.services;
 
 import com.ocp.auth_service.dto.request.CreateRoleRequest;
 import com.ocp.auth_service.dto.request.UpdateRolePermissionsRequest;
+import com.ocp.auth_service.dto.response.PermissionResponse;
 import com.ocp.auth_service.dto.response.RoleResponse;
+import com.ocp.auth_service.dto.response.RoleUserCountResponse;
 import com.ocp.auth_service.entity.Permission;
 import com.ocp.auth_service.entity.Role;
 import com.ocp.auth_service.exception.PermissionNotFoundException;
 import com.ocp.auth_service.exception.RoleNotFoundException;
+import com.ocp.auth_service.mappers.PermissionMapper;
 import com.ocp.auth_service.mappers.RoleMapper;
 import com.ocp.auth_service.repository.PermissionRepository;
 import com.ocp.auth_service.repository.RoleRepository;
@@ -26,6 +29,8 @@ public class RoleService {
 	private final RoleRepository roleRepository;
 	private final PermissionRepository permissionRepository;
 	private final RoleMapper roleMapper;
+    private final PermissionMapper permissionMapper ;
+
 
 	@Transactional
 	public RoleResponse createRole(CreateRoleRequest request) {
@@ -50,19 +55,39 @@ public class RoleService {
 		return roleMapper.toResponse(role);
 	}
 
-	@Transactional
-	public RoleResponse updateRolePermissions(UUID roleId, UpdateRolePermissionsRequest request) {
-		Role role = roleRepository.findById(roleId)
-			.orElseThrow(() -> new RoleNotFoundException(roleId.toString()));
 
-		Set<Permission> permissions = request.getPermissionIds().stream()
-			.map(permissionId -> permissionRepository.findById(permissionId)
-				.orElseThrow(() -> new PermissionNotFoundException(permissionId.toString())))
-			.collect(Collectors.toSet());
 
-		role.setPermissions(permissions);
+    @Transactional(readOnly = true)
+    public List<RoleUserCountResponse> getUserCountsByRole() {
+        return roleRepository.countUsersByRole().stream()
+                .map(p -> new RoleUserCountResponse(p.getRoleName(), p.getUserCount()))
+                .collect(Collectors.toList());
+    }
 
-		Role updatedRole = roleRepository.save(role);
-		return roleMapper.toResponse(updatedRole);
-	}
+    @Transactional(readOnly = true)
+    public List<PermissionResponse> getRolePermissions( UUID id ){
+        Role role =roleRepository.findById(id).orElseThrow(() -> new RoleNotFoundException(id.toString()));
+
+        return role.getPermissions()
+                .stream()
+                .map(permissionMapper::toResponse)
+                .toList();
+
+    }
+
+    @Transactional
+    public RoleResponse updateRolePermissions(UUID roleId, UpdateRolePermissionsRequest request) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RoleNotFoundException(roleId.toString()));
+
+        Set<Permission> permissions = request.getPermissionIds().stream()
+                .map(permissionId -> permissionRepository.findById(permissionId)
+                        .orElseThrow(() -> new PermissionNotFoundException(permissionId.toString())))
+                .collect(Collectors.toSet());
+
+        role.setPermissions(permissions);
+
+        Role updatedRole = roleRepository.save(role);
+        return roleMapper.toResponse(updatedRole);
+    }
 }

@@ -1,9 +1,11 @@
 package com.ocp.auth_service.services;
 
+import com.ocp.auth_service.Repository.LoginHistoryRepository;
 import com.ocp.auth_service.dto.request.AssignRoleRequest;
 import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.request.UpdateUserRequest;
 import com.ocp.auth_service.dto.response.UserResponse;
+import com.ocp.auth_service.dto.response.UserStatsResponse;
 import com.ocp.auth_service.entity.Role;
 import com.ocp.auth_service.entity.UserCredential;
 import com.ocp.auth_service.exception.EmailAlreadyExistsException;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.management.relation.RoleNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,19 +32,22 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder ;
 	private final UserMapper userMapper ;
 	private final RoleRepository roleRepository ;
+    private final LoginHistoryRepository loginHistoryRepository ;
 
 	@Transactional
 	public UserResponse createUser(CreateUserRequest request){
 		if(userCredentialRepository.existsByEmail(request.getEmail())) {
 			throw new EmailAlreadyExistsException(request.getEmail());
 		}
-		UserCredential user= new UserCredential();
-		user.setUserId(UUID.randomUUID());
-		user.setEmail(request.getEmail());
-		user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-		user.setEnabled(true);
-		user.setAccountLocked(false);
-		user.setFailedAttempts(0);
+		UserCredential user= UserCredential.builder()
+                .userId(UUID.randomUUID())
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .enabled(true)
+                .accountLocked(false)
+                .failedAttempts(0)
+                .build();
+
 
 		UserCredential savedUser= userCredentialRepository.save(user);
 
@@ -114,4 +120,28 @@ public class UserService {
 		}
 		userCredentialRepository.deleteById(id);
 	}
+
+    @Transactional(readOnly = true)
+    public UserStatsResponse getUserStats() {
+        long totalUsers = userCredentialRepository.count();
+        long activeUsers = userCredentialRepository.countByEnabledTrue();
+        long lockedAccounts = userCredentialRepository.countByAccountLockedTrue();
+        long totalFailedAttempts = userCredentialRepository.sumFailedAttempts();
+        long usersWithFailedAttempts = userCredentialRepository.countByFailedAttemptsGreaterThan(0);
+
+        return new UserStatsResponse(
+                totalUsers,
+                activeUsers,
+                lockedAccounts,
+                totalFailedAttempts,
+                usersWithFailedAttempts
+        );
+    }
+    @Transactional(readOnly = true)
+    public long getFailedAttemptsLast24Hours() {
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minusHours(24);
+        return loginHistoryRepository.countBySuccessFalseAndLoginDateBetween(start, end);
+
+    }
 }

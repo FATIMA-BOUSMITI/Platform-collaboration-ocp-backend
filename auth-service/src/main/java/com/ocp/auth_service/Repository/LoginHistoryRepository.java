@@ -1,4 +1,8 @@
-package com.ocp.auth_service.repository;
+package com.ocp.auth_service.Repository;
+
+
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
@@ -17,4 +21,5 @@ public interface LoginHistoryRepository
 	List<LoginHistory> findByUserOrderByLoginDateDesc(UserCredential user);
 
 	List<LoginHistory> findBySuccess(boolean success);
+    long countBySuccessFalseAndLoginDateBetween(LocalDateTime start, LocalDateTime end);
 }
