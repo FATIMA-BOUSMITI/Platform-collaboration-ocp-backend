@@ -9,7 +9,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface RoleRepository extends JpaRepository<Role, UUID> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+
+import com.ocp.auth_service.entity.Role;
+
+@Repository
+public interface RoleRepository
+	extends JpaRepository<Role, UUID> {
+
+	Optional<Role> findByName(String name);
 
     Optional<Role> findByName (String name);
     @Query(value = """

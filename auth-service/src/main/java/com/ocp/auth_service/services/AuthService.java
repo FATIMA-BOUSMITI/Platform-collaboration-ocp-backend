@@ -1,8 +1,8 @@
 package com.ocp.auth_service.services;
 
-import com.ocp.auth_service.Repository.PasswordResetTokenRepository;
-import com.ocp.auth_service.Repository.RefreshTokenRepository;
-import com.ocp.auth_service.Repository.UserCredentialRepository;
+import com.ocp.auth_service.repository.PasswordResetTokenRepository;
+import com.ocp.auth_service.repository.RefreshTokenRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import com.ocp.auth_service.dto.request.*;
 
 import com.ocp.auth_service.dto.response.AuthResponse;
@@ -37,8 +37,9 @@ public class AuthService {
 
     public  AuthResponse login(LoginRequest loginRequest){
 
-		 UserCredential user = userCredentialRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->  new UserNotFoundException("Email n'existe pas"));
+		 UserCredential user = userCredentialRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->  new UserNotFoundException("Identifiants invalides. Veuillez vérifier votre adresse e-mail et votre mot de passe."));
 		  if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPasswordHash())){
+
 			  throw new InvalidCredentialsException("Le mot de passe incorrect");
 		  }
 

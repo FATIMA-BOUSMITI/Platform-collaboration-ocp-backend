@@ -1,7 +1,5 @@
 package com.ocp.auth_service.Repository;
 
-import com.ocp.auth_service.entity.Permission;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 
 import java.util.Optional;

@@ -5,7 +5,7 @@ import com.ocp.auth_service.dto.response.PermissionResponse;
 import com.ocp.auth_service.entity.Permission;
 import com.ocp.auth_service.exception.PermissionNotFoundException;
 import com.ocp.auth_service.mappers.PermissionMapper;
-import com.ocp.auth_service.Repository.PermissionRepository;
+import com.ocp.auth_service.repository.PermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
