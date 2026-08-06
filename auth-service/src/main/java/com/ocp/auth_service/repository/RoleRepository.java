@@ -1,13 +1,21 @@
-package com.ocp.auth_service.repository;
+package  com.ocp.auth_service.repository;
 
-import com.ocp.auth_service.entity.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface RoleRepository extends JpaRepository<Role, UUID> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-    Optional<Role> findByName (String name);
+
+import com.ocp.auth_service.entity.Role;
+
+@Repository
+public interface RoleRepository
+	extends JpaRepository<Role, UUID> {
+
+	Optional<Role> findByName(String name);
+
+	boolean existsByName(String name);
 }
