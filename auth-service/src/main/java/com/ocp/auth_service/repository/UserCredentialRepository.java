@@ -2,7 +2,7 @@ package com.ocp.auth_service.repository;
 
 import com.ocp.auth_service.entity.UserCredential;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import lombok.Builder;
 import java.util.Optional;
 import java.util.UUID;
 

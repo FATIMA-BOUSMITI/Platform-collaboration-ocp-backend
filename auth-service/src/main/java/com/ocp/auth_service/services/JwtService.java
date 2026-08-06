@@ -56,6 +56,7 @@ public class JwtService {
 		return Jwts.builder()
 			.subject(user.getEmail())
 			.claim("userId", user.getUserId().toString())
+			.claim("type", "ACCESS")   // <-- nouvelle ligne
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + accessExpiration))
 			.signWith(getSignInKey())
@@ -67,6 +68,7 @@ public class JwtService {
 		return Jwts.builder()
 			.subject(user.getEmail())
 			.claim("userId", user.getUserId().toString())
+			.claim("type", "REFRESH")
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + refreshExpiration))
 			.signWith(getSignInKey())
@@ -106,4 +108,8 @@ public class JwtService {
 			.parseSignedClaims(token)
 			.getPayload();
 	}
+	public String extractTokenType(String token) {
+		return extractClaims(token).get("type", String.class);
+	}
+
 }

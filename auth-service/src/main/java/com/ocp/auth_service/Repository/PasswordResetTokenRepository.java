@@ -1,4 +1,4 @@
-package com.ocp.auth_service.Repository;
+package com.ocp.auth_service.repository;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
