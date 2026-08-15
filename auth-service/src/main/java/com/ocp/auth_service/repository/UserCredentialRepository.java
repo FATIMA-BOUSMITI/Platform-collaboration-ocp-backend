@@ -18,9 +18,7 @@ public interface UserCredentialRepository
 
 	Optional<UserCredential> findByEmail(String email);
 
-	boolean existsByEmail(String email);
 
-    Optional<UserCredential> findByEmail(String email);
     boolean existsByEmail(String email);
     long countByEnabledTrue();
     long countByAccountLockedTrue();

@@ -19,7 +19,6 @@ import com.ocp.auth_service.entity.Role;
 public interface RoleRepository
 	extends JpaRepository<Role, UUID> {
 
-	Optional<Role> findByName(String name);
 
     Optional<Role> findByName (String name);
     @Query(value = """
