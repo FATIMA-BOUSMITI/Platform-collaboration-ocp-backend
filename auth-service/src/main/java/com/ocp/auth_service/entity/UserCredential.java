@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(name = "user_credentials")
 @Getter
 @Setter
-@NoArgsConstructor
+@Builder
 public class UserCredential {
 
     @Id
