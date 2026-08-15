@@ -1,8 +1,7 @@
 package com.ocp.auth_service.services;
 
-import com.ocp.auth_service.Repository.RefreshTokenRepository;
-import com.ocp.auth_service.Repository.UserCredentialRepository;
-import com.ocp.auth_service.dto.response.AuthResponse;
+import com.ocp.auth_service.repository.RefreshTokenRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import com.ocp.auth_service.dto.response.RefreshTokenResponse;
 import com.ocp.auth_service.entity.RefreshToken;
 import com.ocp.auth_service.entity.UserCredential;

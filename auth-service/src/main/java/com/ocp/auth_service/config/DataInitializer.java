@@ -1,12 +1,10 @@
 package com.ocp.auth_service.config;
 
 import com.ocp.auth_service.entity.Permission;
-import com.ocp.auth_service.Repository.PermissionRepository;
+import com.ocp.auth_service.repository.PermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

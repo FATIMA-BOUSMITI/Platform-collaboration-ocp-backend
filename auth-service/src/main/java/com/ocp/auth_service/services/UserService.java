@@ -1,6 +1,6 @@
 package com.ocp.auth_service.services;
 
-import com.ocp.auth_service.Repository.LoginHistoryRepository;
+import com.ocp.auth_service.repository.LoginHistoryRepository;
 import com.ocp.auth_service.dto.request.AssignRoleRequest;
 import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.request.UpdateUserRequest;
@@ -11,8 +11,8 @@ import com.ocp.auth_service.entity.UserCredential;
 import com.ocp.auth_service.exception.EmailAlreadyExistsException;
 import com.ocp.auth_service.exception.UserNotFoundException;
 import com.ocp.auth_service.mappers.UserMapper;
-import com.ocp.auth_service.Repository.RoleRepository;
-import com.ocp.auth_service.Repository.UserCredentialRepository;
+import com.ocp.auth_service.repository.RoleRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

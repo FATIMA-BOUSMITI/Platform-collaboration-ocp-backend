@@ -1,4 +1,4 @@
-package com.ocp.auth_service.Repository;
+package com.ocp.auth_service.repository;
 
 import com.ocp.auth_service.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;

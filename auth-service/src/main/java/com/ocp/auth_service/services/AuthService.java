@@ -1,8 +1,8 @@
 package com.ocp.auth_service.services;
 
-import com.ocp.auth_service.Repository.PasswordResetTokenRepository;
-import com.ocp.auth_service.Repository.RefreshTokenRepository;
-import com.ocp.auth_service.Repository.UserCredentialRepository;
+import com.ocp.auth_service.repository.PasswordResetTokenRepository;
+import com.ocp.auth_service.repository.RefreshTokenRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import com.ocp.auth_service.dto.request.*;
 
 import com.ocp.auth_service.dto.response.AuthResponse;
@@ -14,8 +14,6 @@ import com.ocp.auth_service.exception.AccountDisabledException;
 import com.ocp.auth_service.exception.AccountLockedException;
 import com.ocp.auth_service.exception.InvalidCredentialsException;
 import com.ocp.auth_service.exception.UserNotFoundException;
-import com.ocp.auth_service.mappers.UserCredentialMapper;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

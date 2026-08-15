@@ -1,7 +1,7 @@
 package com.ocp.auth_service.services;
 
 
-import com.ocp.auth_service.Repository.UserCredentialRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import com.ocp.auth_service.dto.request.LoginRequest;
 import com.ocp.auth_service.dto.response.AuthResponse;
 import com.ocp.auth_service.dto.response.RefreshTokenResponse;
@@ -10,7 +10,6 @@ import com.ocp.auth_service.exception.AccountDisabledException;
 import com.ocp.auth_service.exception.AccountLockedException;
 import com.ocp.auth_service.exception.InvalidCredentialsException;
 import com.ocp.auth_service.exception.UserNotFoundException;
-import lombok.Builder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
