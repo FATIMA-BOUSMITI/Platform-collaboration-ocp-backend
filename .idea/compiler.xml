@@ -17,6 +17,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
         </processorPath>
+        <module name="organisation-service" />
         <module name="auth-service" />
       </profile>
       <profile name="Annotation profile for project-management-service" enabled="true">
@@ -30,9 +31,6 @@
         <module name="project-management-service.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="auth-service (1)" target="17" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -42,6 +40,7 @@
       <module name="project-management-service" options="-parameters" />
       <module name="project-management-service.main" options="-parameters" />
       <module name="project-management-service.test" options="-parameters" />
+      <module name="organisation-service" options="-parameters" />
     </option>
   </component>
 </project>

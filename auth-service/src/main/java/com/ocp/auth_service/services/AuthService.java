@@ -35,8 +35,9 @@ public class AuthService {
 
     public  AuthResponse login(LoginRequest loginRequest){
 
-		 UserCredential user = userCredentialRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->  new UserNotFoundException("Email n'existe pas"));
+		 UserCredential user = userCredentialRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->  new UserNotFoundException("Identifiants invalides. Veuillez vérifier votre adresse e-mail et votre mot de passe."));
 		  if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPasswordHash())){
+
 			  throw new InvalidCredentialsException("Le mot de passe incorrect");
 		  }
 

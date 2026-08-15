@@ -2,6 +2,7 @@ package com.ocp.auth_service.services;
 
 import com.ocp.auth_service.repository.RefreshTokenRepository;
 import com.ocp.auth_service.repository.UserCredentialRepository;
+import com.ocp.auth_service.dto.response.AuthResponse;
 import com.ocp.auth_service.dto.response.RefreshTokenResponse;
 import com.ocp.auth_service.entity.RefreshToken;
 import com.ocp.auth_service.entity.UserCredential;
@@ -49,6 +50,9 @@ public class RefreshTokenService {
 
 	public RefreshTokenResponse refreshToken(String token) {
 		RefreshToken refreshToken = refreshTokenRepository.findByRefreshToken(token).orElseThrow(()-> new RuntimeException("Le token n'existe pas "));
+		if (!"REFRESH".equals(jwtService.extractTokenType(token))) {
+			throw new RuntimeException("Ce token n'est pas un Refresh Token");
+		}
 		if(refreshToken.isRevoked()){
 			throw new RuntimeException("Deja expiré");
 		}
