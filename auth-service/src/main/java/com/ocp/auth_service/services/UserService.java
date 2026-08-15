@@ -1,6 +1,6 @@
 package com.ocp.auth_service.services;
 
-import com.ocp.auth_service.Repository.LoginHistoryRepository;
+import com.ocp.auth_service.repository.LoginHistoryRepository;
 import com.ocp.auth_service.dto.request.AssignRoleRequest;
 import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.request.UpdateUserRequest;

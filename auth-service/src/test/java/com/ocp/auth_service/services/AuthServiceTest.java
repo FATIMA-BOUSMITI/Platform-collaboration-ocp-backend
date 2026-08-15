@@ -10,7 +10,6 @@ import com.ocp.auth_service.exception.AccountDisabledException;
 import com.ocp.auth_service.exception.AccountLockedException;
 import com.ocp.auth_service.exception.InvalidCredentialsException;
 import com.ocp.auth_service.exception.UserNotFoundException;
-import lombok.Builder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

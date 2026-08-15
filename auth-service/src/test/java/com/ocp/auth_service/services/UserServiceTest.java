@@ -4,9 +4,8 @@ import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.response.UserResponse;
 import com.ocp.auth_service.entity.UserCredential;
 import com.ocp.auth_service.mappers.UserMapper;
-import com.ocp.auth_service.Repository.RoleRepository;
-import com.ocp.auth_service.Repository.UserCredentialRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.ocp.auth_service.repository.RoleRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -19,7 +18,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

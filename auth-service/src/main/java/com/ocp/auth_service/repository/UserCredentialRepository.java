@@ -1,4 +1,4 @@
-package com.ocp.auth_service.Repository;
+package com.ocp.auth_service.repository;
 
 
 
@@ -17,6 +17,11 @@ public interface UserCredentialRepository
 	Optional<UserCredential> findByEmail(String email);
 
 
-	boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
+    long countByEnabledTrue();
+    long countByAccountLockedTrue();
+    long countByFailedAttemptsGreaterThan(int threshold);
+    @Query("SELECT COALESCE(SUM(u.failedAttempts), 0) FROM UserCredential u")
+    long sumFailedAttempts();
 
 }

@@ -14,8 +14,6 @@ import com.ocp.auth_service.exception.AccountDisabledException;
 import com.ocp.auth_service.exception.AccountLockedException;
 import com.ocp.auth_service.exception.InvalidCredentialsException;
 import com.ocp.auth_service.exception.UserNotFoundException;
-import com.ocp.auth_service.mappers.UserCredentialMapper;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
