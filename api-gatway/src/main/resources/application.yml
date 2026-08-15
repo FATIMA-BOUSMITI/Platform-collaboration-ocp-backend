@@ -12,6 +12,12 @@ spring:
           predicates:
             - Path=/api/**
 
+        - id: project-management-service-route
+          uri: http://localhost:8082
+          predicates:
+              - Path=/api/projects/**
+
+
       globalcors:
           cors-configurations:
             '[/**]':
