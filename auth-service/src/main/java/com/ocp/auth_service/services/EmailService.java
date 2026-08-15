@@ -18,7 +18,7 @@ public class EmailService {
 
 		message.setTo(email);
 		message.setSubject("Reset Password");
-		message.setText("http://localhost:3000/reset-password?token=" + token);
+		message.setText("http://localhost:5173/reset-password?token=" + token);
 
 		mailSender.send(message);
 	}

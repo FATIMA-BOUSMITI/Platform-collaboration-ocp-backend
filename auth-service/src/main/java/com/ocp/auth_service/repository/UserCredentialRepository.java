@@ -16,6 +16,7 @@ public interface UserCredentialRepository
 
 	Optional<UserCredential> findByEmail(String email);
 
+
 	boolean existsByEmail(String email);
 
 }
