@@ -1,5 +1,4 @@
 package com.ocp.auth_service.services;
-
 import com.ocp.auth_service.repository.LoginHistoryRepository;
 import com.ocp.auth_service.dto.request.AssignRoleRequest;
 import com.ocp.auth_service.dto.request.CreateUserRequest;
@@ -17,7 +16,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.management.relation.RoleNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,6 +63,17 @@ public class UserService {
 		return userMapper.toResponse(user);
 
 	}
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserByUserId(UUID userId){
+
+        UserCredential user= userCredentialRepository.findByUserId(userId)
+                .orElseThrow(()->new UserNotFoundException(userId.toString()));
+
+
+        return userMapper.toResponse(user);
+
+    }
 
 	@Transactional(readOnly = true)
 	public List<UserResponse> getAllUsers(){

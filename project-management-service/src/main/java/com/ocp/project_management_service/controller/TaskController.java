@@ -40,7 +40,7 @@ public class TaskController {
 
 
 
-    @GetMapping("/projects/{projectId}/tasks")
+    /*@GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<List<TaskResponseDTO>> getTasksByProject(
             @PathVariable UUID projectId) {
 
@@ -48,24 +48,24 @@ public class TaskController {
                 taskService.getTasksByProject(projectId);
 
         return ResponseEntity.ok(response);
-    }
+    }*/
 
 
     // GET /api/projects/{projectId}/tasks?status=TODO
     @GetMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<List<TaskResponseDTO>> getTasksByProjectAndStatus(
+    public ResponseEntity<List<TaskResponseDTO>> getTasksByProject(
             @PathVariable UUID projectId,
             @RequestParam(required = false) Task.TaskStatus status) {
 
-        if (status == null) {
-            return ResponseEntity.ok(
-                    taskService.getTasksByProject(projectId)
-            );
+        List<TaskResponseDTO> response;
+
+        if (status != null) {
+            response = taskService.getTasksByProjectAndStatus(projectId, status);
+        } else {
+            response = taskService.getTasksByProject(projectId);
         }
 
-        return ResponseEntity.ok(
-                taskService.getTasksByProjectAndStatus(projectId, status)
-        );
+        return ResponseEntity.ok(response);
     }
 
 

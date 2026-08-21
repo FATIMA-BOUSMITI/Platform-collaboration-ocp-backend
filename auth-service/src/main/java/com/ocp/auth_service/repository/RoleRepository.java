@@ -17,8 +17,6 @@ import com.ocp.auth_service.entity.Role;
 public interface RoleRepository
 	extends JpaRepository<Role, UUID> {
 
-
-
 	Optional<Role> findByName(String name);
     @Query(value = """
         SELECT r.name AS roleName, COUNT(ur.user_id) AS userCount
@@ -28,4 +26,5 @@ public interface RoleRepository
         """,nativeQuery = true)
     List<RoleUserCountProjection> countUsersByRole();
 	boolean existsByName(String name);
+
 }

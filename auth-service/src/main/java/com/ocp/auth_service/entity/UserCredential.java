@@ -2,10 +2,7 @@ package com.ocp.auth_service.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,6 +16,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserCredential {
 
     @Id

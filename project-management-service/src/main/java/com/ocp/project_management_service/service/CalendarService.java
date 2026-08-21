@@ -10,6 +10,7 @@ import com.ocp.project_management_service.mapper.CalendarEventMapper;
 import com.ocp.project_management_service.repository.CalendarEventRepository;
 import com.ocp.project_management_service.repository.ProjectRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CalendarService {
     private final CalendarEventRepository calendarEventRepository;
     private final ProjectRepository projectRepository ;
