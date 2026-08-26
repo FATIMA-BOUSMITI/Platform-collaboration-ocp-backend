@@ -17,6 +17,10 @@ spring:
           predicates:
               - Path=/api/projects/**
 
+        - id: communication-service-route
+          uri: http://localhost:8089
+          predicates:
+                    - Path=/api/conversations/**
 
       globalcors:
           cors-configurations:
