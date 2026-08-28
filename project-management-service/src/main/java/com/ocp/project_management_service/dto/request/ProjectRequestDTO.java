@@ -21,18 +21,18 @@ public class ProjectRequestDTO {
     @NotBlank(message = "la description est obligatoire")
     private String description;
 
-    @NotBlank(message = "affectation responsible est obligatoire")
+    @NotNull(message = "affectation responsible est obligatoire")
     private UUID responsibleId;
 
-    @NotBlank(message = "department est obligatoire")
+    @NotNull(message = "department est obligatoire")
     private UUID departmentId;
 
     @NotNull
     private LocalDate startDate;
 
-    @NotBlank(message = "la date de fin obligatoire")
+    @NotNull(message = "la date de fin obligatoire")
     private LocalDate endDate ;
-
+    @NotNull(message = "La priorité est obligatoire")
     private Project.ProjectPriority projectPriority; // LOW, MEDIUM, HIGH, CRITICAL
     private BigDecimal budget;
 

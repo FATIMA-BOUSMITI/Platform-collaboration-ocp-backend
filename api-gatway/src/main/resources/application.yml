@@ -4,34 +4,47 @@ server:
 spring:
   application:
     name: gateway-service
+
   cloud:
     gateway:
+
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
       routes:
+
+
+
+        - id: project-management-service-route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/projects/**
+
+        - id: communication-service-route
+          uri: http://localhost:8089
+          predicates:
+            - Path=/api/conversations/**
+
         - id: auth-service-route
           uri: http://localhost:8080
           predicates:
             - Path=/api/**
 
-        - id: project-management-service-route
-          uri: http://localhost:8082
-          predicates:
-              - Path=/api/projects/**
-
-        - id: communication-service-route
-          uri: http://localhost:8089
-          predicates:
-                    - Path=/api/conversations/**
-
-      globalcors:
-          cors-configurations:
-            '[/**]':
-              allowedOrigins: "http://localhost:5173"
-              allowedMethods:
-                - GET
-                - POST
-                - PUT
-                - PATCH
-                - DELETE
-                - OPTIONS
-              allowedHeaders: "*"
-              allowCredentials: true
+eureka:
+  client:
+    enabled: false
