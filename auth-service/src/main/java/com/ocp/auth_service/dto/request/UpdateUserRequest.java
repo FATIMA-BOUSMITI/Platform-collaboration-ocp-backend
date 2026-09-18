@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class UpdateUserRequest {
@@ -13,5 +15,6 @@ public class UpdateUserRequest {
 
     private Boolean enabled;
     private Boolean accountLocked;
+	private UUID roleId;
 
 }

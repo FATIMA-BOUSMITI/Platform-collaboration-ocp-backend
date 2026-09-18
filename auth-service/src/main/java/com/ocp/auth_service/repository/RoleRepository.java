@@ -1,6 +1,7 @@
-package com.ocp.auth_service.Repository;
+package com.ocp.auth_service.repository;
 
 import com.ocp.auth_service.entity.Role;
+import lombok.Getter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
+
 import com.ocp.auth_service.entity.Role;
 
 @Repository
@@ -21,7 +23,8 @@ public interface RoleRepository
 
 	Optional<Role> findByName(String name);
 
-    Optional<Role> findByName (String name);
+
+
     @Query(value = """
         SELECT r.name AS roleName, COUNT(ur.user_id) AS userCount
         FROM roles r

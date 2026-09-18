@@ -2,8 +2,10 @@ package com.ocp.auth_service.controllers;
 import com.ocp.auth_service.dto.request.AssignRoleRequest;
 import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.request.UpdateUserRequest;
+import com.ocp.auth_service.dto.response.RoleResponse;
 import com.ocp.auth_service.dto.response.UserResponse;
 import com.ocp.auth_service.dto.response.UserStatsResponse;
+import com.ocp.auth_service.services.RoleService;
 import com.ocp.auth_service.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -14,12 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping("/api/users")
+@RequestMapping("/api/auth/users")
 @RestController
 @AllArgsConstructor
 public class UserController {
 
 	private final UserService userService;
+	private final RoleService roleService;
 
 	@PostMapping
 	public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
@@ -49,7 +52,7 @@ public class UserController {
 
 	@PostMapping("/assign-roles")
 	public ResponseEntity<UserResponse> assignRoles(@Valid @RequestBody AssignRoleRequest request) {
-		UserResponse response = userService.assignRoles(request);
+		UserResponse response = userService.assignRole(request);
 		return ResponseEntity.ok(response);
 	}
 
@@ -68,4 +71,12 @@ public class UserController {
         long count = userService.getFailedAttemptsLast24Hours();
         return ResponseEntity.ok(count);
     }
+	@GetMapping("/{userId}/roles")
+	public ResponseEntity<RoleResponse> getRolesByUserId(
+		@PathVariable UUID userId
+	) {
+		return ResponseEntity.ok(
+			roleService.getRolesByUserId(userId)
+		);
+	}
 }

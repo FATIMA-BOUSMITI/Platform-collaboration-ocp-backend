@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+import java.util.UUID;
+
 @Getter
 @Setter
 public class CreateUserRequest {
@@ -13,9 +16,10 @@ public class CreateUserRequest {
     @NotBlank(message = "L'email est obligatoire ")
     @Email(message = "Fromat d'email invalide")
     private String email ;
+	private UUID userId;
+	private UUID roleId;
 
-    @NotBlank(message = "Le mot de passe est obligatoire ")
-    @Size(min = 8 , message = "le mot de passe doit contenir au moins 8 caractères")
-    private String password;
+
+
 
 }

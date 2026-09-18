@@ -1,4 +1,4 @@
-package com.ocp.auth_service.Repository;
+package com.ocp.auth_service.repository;
 
 import com.ocp.auth_service.entity.UserCredential;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.ocp.auth_service.entity.UserCredential;
+import lombok.Builder;
 
 @Repository
 public interface UserCredentialRepository
@@ -19,9 +20,9 @@ public interface UserCredentialRepository
 	Optional<UserCredential> findByEmail(String email);
 
 	boolean existsByEmail(String email);
+	Optional<UserCredential> findByUserId(UUID userId);
 
-    Optional<UserCredential> findByEmail(String email);
-    boolean existsByEmail(String email);
+
     long countByEnabledTrue();
     long countByAccountLockedTrue();
     long countByFailedAttemptsGreaterThan(int threshold);

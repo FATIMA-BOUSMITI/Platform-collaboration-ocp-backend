@@ -1,4 +1,6 @@
-package com.ocp.organisation_service.clients.dto;
+package com.ocp.organisation_service.dto.response;
+
+
 
 import lombok.Data;
 
@@ -7,7 +9,10 @@ import java.util.UUID;
 @Data
 public class AuthUserResponse {
 
-	private UUID id;
+	private UUID userId;
+
 	private String email;
-	private boolean enabled;
+
+	private Boolean enabled;
+
 }

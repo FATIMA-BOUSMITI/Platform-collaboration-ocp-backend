@@ -16,5 +16,5 @@ public class AssignRoleRequest {
     private UUID userId;
 
     @NotEmpty(message = "Au moins un rôle doit être fourni")
-    private Set<UUID> roleIds;
+    private UUID roleId;
 }

@@ -25,7 +25,8 @@ public class UserResponse {
 
 	private UserStatus status;
 
-	private UUID departmentId;
+
+	private UUID departementId;
 
 	private UUID authUserId;
 

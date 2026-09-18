@@ -7,12 +7,14 @@ import com.ocp.auth_service.dto.response.RoleResponse;
 import com.ocp.auth_service.dto.response.RoleUserCountResponse;
 import com.ocp.auth_service.entity.Permission;
 import com.ocp.auth_service.entity.Role;
+import com.ocp.auth_service.entity.UserCredential;
 import com.ocp.auth_service.exception.PermissionNotFoundException;
 import com.ocp.auth_service.exception.RoleNotFoundException;
 import com.ocp.auth_service.mappers.PermissionMapper;
 import com.ocp.auth_service.mappers.RoleMapper;
 import com.ocp.auth_service.repository.PermissionRepository;
 import com.ocp.auth_service.repository.RoleRepository;
+import com.ocp.auth_service.repository.UserCredentialRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ public class RoleService {
 	private final PermissionRepository permissionRepository;
 	private final RoleMapper roleMapper;
     private final PermissionMapper permissionMapper ;
+	private  final UserCredentialRepository  userCredentialRepository;
 
 
 	@Transactional
@@ -90,4 +93,15 @@ public class RoleService {
         Role updatedRole = roleRepository.save(role);
         return roleMapper.toResponse(updatedRole);
     }
+	public RoleResponse getRolesByUserId(UUID userId) {
+
+		UserCredential user = userCredentialRepository
+			.findByUserId(userId)
+			.orElseThrow(() ->
+				new RuntimeException("User not found")
+			);
+
+		return roleMapper.toResponse(user.getRole());
+	}
+
 }
