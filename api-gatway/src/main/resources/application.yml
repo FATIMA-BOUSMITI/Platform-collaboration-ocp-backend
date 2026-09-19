@@ -40,6 +40,11 @@ spring:
           predicates:
             - Path=/api/conversations/**
 
+        - id: document-service-route
+          uri: http://localhost:8079
+          predicates:
+            - Path=/api/documents/**
+
         - id: auth-service-route
           uri: http://localhost:8080
           predicates:
