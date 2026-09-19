@@ -56,7 +56,8 @@ public class JwtService {
 		return Jwts.builder()
 			.subject(user.getEmail())
 			.claim("userId", user.getUserId().toString())
-			.claim("type", "ACCESS")   // <-- nouvelle ligne
+			.claim("type", "ACCESS")
+			.claim("jti", UUID.randomUUID().toString())
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + accessExpiration))
 			.signWith(getSignInKey())
@@ -69,6 +70,7 @@ public class JwtService {
 			.subject(user.getEmail())
 			.claim("userId", user.getUserId().toString())
 			.claim("type", "REFRESH")
+			.claim("jti", UUID.randomUUID().toString())
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + refreshExpiration))
 			.signWith(getSignInKey())

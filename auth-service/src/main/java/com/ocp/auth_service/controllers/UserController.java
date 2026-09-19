@@ -36,6 +36,12 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserResponse> getUserByUserId(@PathVariable UUID userId) {
+        UserResponse response = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
+
 	@GetMapping
 	public ResponseEntity<List<UserResponse>> getAllUsers() {
 		List<UserResponse> responses = userService.getAllUsers();

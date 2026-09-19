@@ -111,6 +111,26 @@ public class UserProfileServiceImpl implements UserProfileService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public UserResponseDTO getUserByAuthUserId(UUID authUserId) {
+		UserProfile user = repository.findByAuthUserId(authUserId)
+			.orElseThrow(() -> new RuntimeException("User not found with authUserId: " + authUserId));
+
+		List<RoleResponseDTO> roles = List.of();
+		try {
+			if (user.getAuthUserId() != null) {
+				roles = authClient.getRolesByUserId(user.getAuthUserId());
+			}
+		} catch (Exception ignored) {
+			System.out.println("Pas de rôle pour : " + user.getEmail());
+		}
+
+		UserResponseDTO response = mapper.toResponse(user);
+		response.setRoles(roles);
+		return response;
+	}
+
+	@Override
 	@Transactional
 	public UserResponseDTO updateUser(UUID id, UserUpdateRequestDTO request) {
 		UserProfile user = repository.findById(id)

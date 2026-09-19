@@ -28,22 +28,22 @@ public class RefreshTokenService {
 	private final  UserCredentialRepository userCredentialRepository;
 
 	public RefreshTokenResponse createRefreshToken(UserCredential user) {
+		List<RefreshToken> existingTokens = refreshTokenRepository.findByUser(user);
+		for (RefreshToken existingToken : existingTokens) {
+			existingToken.setRevoked(true);
+		}
+		if (!existingTokens.isEmpty()) {
+			refreshTokenRepository.saveAll(existingTokens);
+		}
+
 		RefreshToken refreshToken = new RefreshToken();
-		System.out.println(refreshToken);
 		String jwtToken = jwtService.generateRefreshToken(user);
 		refreshToken.setRefreshToken(jwtToken);
-
-		// generate token //la fonction generate refreshtoken fun
 		refreshToken.setUser(user);
 		refreshToken.setCreatedAt(LocalDateTime.now());
-		// ajoute la date de cration
 		refreshToken.setExpiryDate(LocalDateTime.now().plusDays(7));
 		refreshToken.setRevoked(false);
-		RefreshToken saved= refreshTokenRepository.save(refreshToken);
-
-		System.out.println(" token"+saved.getRefreshToken());
-		RefreshTokenResponse response = refreshTokenMapper.toResponse(saved);
-		System.out.println(response);
+		RefreshToken saved = refreshTokenRepository.save(refreshToken);
 
 		return refreshTokenMapper.toResponse(saved);
 	}

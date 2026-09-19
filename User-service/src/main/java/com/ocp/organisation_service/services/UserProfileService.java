@@ -15,6 +15,8 @@ public interface UserProfileService {
 
 	UserResponseDTO getUserById(UUID id);
 
+	UserResponseDTO getUserByAuthUserId(UUID authUserId);
+
 	UserResponseDTO updateUser(UUID id, UserUpdateRequestDTO request);
 
 	void deleteUser(UUID id);
