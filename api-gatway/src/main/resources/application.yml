@@ -9,9 +9,24 @@ spring:
     gateway:
       routes:
         - id: project-management-service-route
-          uri: http://localhost:8082
+          uri: http://localhost:8083
           predicates:
             - Path=/api/projects/**
+
+        - id: task-service-route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/tasks/**
+
+        - id: subtask-service-route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/subtasks/**
+
+        - id: calendar-service-route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/calendar/**
 
         - id: communication-service-route
           uri: http://localhost:8089
@@ -27,6 +42,11 @@ spring:
           uri: http://localhost:8080
           predicates:
             - Path=/api/roles/**
+
+        - id: permission-service-route
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/permissions/**
 
         - id: user-service-route
           uri: http://localhost:8082
