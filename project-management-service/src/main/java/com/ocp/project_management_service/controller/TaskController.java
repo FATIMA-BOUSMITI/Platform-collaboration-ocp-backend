@@ -25,6 +25,7 @@ import java.util.UUID;
 public class TaskController {
 
     private final TaskService taskService;
+    public record StatusRequest(Task.TaskStatus status){}
 
 
     @PostMapping("/projects/{projectId}/tasks")
@@ -118,11 +119,11 @@ public class TaskController {
     @PatchMapping("/tasks/{id}/status")
     public ResponseEntity<TaskResponseDTO> updateTaskStatus(
             @PathVariable UUID id,
-            @RequestBody Task.TaskStatus status,
+            @RequestBody StatusRequest request,
             @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         TaskResponseDTO response =
-                taskService.updateTaskStatus(id, status, authenticatedUser);
+                taskService.updateTaskStatus(id, request.status(), authenticatedUser);
 
         return ResponseEntity.ok(response);
     }

@@ -46,6 +46,7 @@ public class TaskService {
     private  final CommentMapper commentMapper ;
     private final SubTaskMapper subTaskMapper;
     private final ProjectAccessPolicy projectAccessPolicy;
+    private final BoardService boardService;
 
     // creation
     @Transactional
@@ -59,14 +60,16 @@ public class TaskService {
 
            Task task = Task.builder().
                 title(request.getTitle()).
-                description(request.getDescription()).
+                description(request.getDescription()==null?"":request.getDescription()).
                 assigneeId(request.getAssigneeId()).
                 priority(request.getPriority()).
                 dueDate(request.getDueDate()).
                    project(project).
-                estimatedTime(Duration.ofMinutes(request.getEstimatedTimeMinutes())).
+                estimatedTime(Duration.ofMinutes(request.getEstimatedTimeMinutes()==null?0:request.getEstimatedTimeMinutes())).
+                realTime(Duration.ZERO).
                 status(Task.TaskStatus.TODO).build();
 
+        boardService.assignInitialColumn(task,request.getColumnId(),authenticatedUser);
         Task savedTask = taskRepository.save(task);
         return taskMapper.toResponseDTO(savedTask);
 
@@ -142,6 +145,7 @@ public class TaskService {
         projectAccessPolicy.requireTaskStatusChange(task, authenticatedUser);
         if(status!= null) {
             task.setStatus(status);
+            task.setColumnId(null);
         }
         Task savedTask= taskRepository.save(task);
         return taskMapper.toResponseDTO(savedTask);

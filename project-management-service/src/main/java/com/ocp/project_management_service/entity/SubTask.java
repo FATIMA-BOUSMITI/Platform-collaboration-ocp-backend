@@ -11,6 +11,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class SubTask {
 
     @Id

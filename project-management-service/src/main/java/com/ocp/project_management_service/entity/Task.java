@@ -18,6 +18,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class Task {
     public  enum TaskStatus{
         TODO,
@@ -30,6 +32,9 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id ;
+    private UUID columnId;
+    private long sortIndex;
+    @Version private long version;
 
 
     @Column(nullable = false,length = 150 )
@@ -38,9 +43,9 @@ public class Task {
     @Column(nullable = false)
     private String description;
 
-    @Column(name="assignee_id",nullable = false)
+    @Column(name="assignee_id")
     private UUID assigneeId;
-    @Column(name="due_date",nullable = false)
+    @Column(name="due_date")
     private LocalDate dueDate ;
 
     @Column(name="estimated_time",nullable = false)
@@ -60,9 +65,11 @@ public class Task {
     private Project project ;
 
     @OneToMany(mappedBy = "task",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @Builder.Default
     private List<SubTask> subTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "task",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @Builder.Default
     private List<TaskComment> taskComments = new ArrayList<>();
 
 

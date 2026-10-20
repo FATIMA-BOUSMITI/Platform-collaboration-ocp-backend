@@ -14,6 +14,8 @@ import java.util.UUID;
 @Setter
 @Getter
 @Builder
+@lombok.NoArgsConstructor
+@lombok.AllArgsConstructor
 public class TaskComment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
