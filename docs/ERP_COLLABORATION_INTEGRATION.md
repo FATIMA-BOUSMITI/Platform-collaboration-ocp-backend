@@ -40,7 +40,7 @@ Kanban : projets accessibles selon le rôle, colonnes personnalisées liées à 
 
 Messagerie : conversations privées à deux membres, groupes et discussions de projet, annuaire réel, historique et recherche dans les messages chargés, participants, envoi REST persistant puis signal WebSocket après commit. Le créateur d'une conversation projet doit pouvoir lire ce projet. Le groupe possède ensuite sa propre liste de membres : aucun partage automatique de documents ou des droits du projet. Ajout de participants réservé aux administrateurs de groupe. Téléchargement via requête authentifiée. Taille 10 Mo/fichier et cinq fichiers/message côté serveur ; sélection d'un fichier par envoi dans l'interface. Le retry d'un fichier n'envoie pas à nouveau le texte déjà enregistré.
 
-Notifications : nouveaux messages, création/affectation, mise à jour, changement de statut et commentaire de tâche, échéance. Destinataires tâches : responsable du projet et personne affectée, hors auteur ; échéance : personne affectée. Fil d'historique paginé 40, lu/non lu, tout lire, compteur et préférences messages/tâches/échéances. Les événements tâches sont persistés avec la transaction métier puis livrés avec retry exponentiel. Le service de réception déduplique l'identifiant d'événement. Les échéances arrivent par ordonnanceur toutes les cinq minutes, jusqu'au lendemain et pour les tâches non terminées/non archivées.
+Notifications : nouveaux messages, création/affectation, mise à jour, changement de statut et commentaire de tâche, échéance. Destinataires tâches : responsable du projet et personne affectée, hors auteur ; échéance : personne affectée. Fil d'historique paginé 40, lu/non lu, tout lire, compteur et préférences messages/tâches/échéances/mentions/invitations. Les événements tâches sont persistés avec la transaction métier puis livrés avec retry exponentiel. Le service de réception déduplique l'identifiant d'événement. Les échéances arrivent par ordonnanceur toutes les cinq minutes, jusqu'au lendemain et pour les tâches non terminées/non archivées.
 
 ## Authentification et temps réel
 
@@ -77,7 +77,7 @@ Les scripts sont versionnés mais aucun moteur Flyway n'est ajouté automatiquem
 | communication | V20261020_01__messaging_realtime.sql | project_id, last_read_at, métadonnées pièces jointes et index |
 | communication | V20261020_02__collaboration_notifications.sql | notifications, préférences et index |
 
-Ordre : scripts 01 puis 02 dans chacun des deux services, puis démarrer les services compilés et le frontend. Ils n'effacent aucune table ni ligne métier. La suppression de NOT NULL relaxe les contraintes de tâche pour autoriser un brouillon non affecté/sans date. Vérifier les noms de tables historiques project/task/conversations/messages avant application ; les scripts ciblent les mappings de master2. Le retour applicatif doit conserver les nouvelles colonnes/tables plutôt que supprimer les données de collaboration.
+Ordre : scripts 01 puis 02 puis 03 dans chacun des deux services, puis démarrer les services compilés et le frontend. Ils n'effacent aucune table ni ligne métier. La suppression de NOT NULL relaxe les contraintes de tâche pour autoriser un brouillon non affecté/sans date. Vérifier les noms de tables historiques project/task/conversations/messages avant application ; les scripts ciblent les mappings de master2. Le retour applicatif doit conserver les nouvelles colonnes/tables plutôt que supprimer les données de collaboration.
 
 ## Vérification effectuée et limites
 
@@ -86,3 +86,7 @@ Compilations uniquement : npm run build ; mvn -q -Dmaven.test.skip=true compile 
 QA différée : connexion/refresh/révocation dans les quatre rôles, droits d'accès croisés et multi-utilisateurs, conflits de drag-and-drop, colonnes et archivage historiques, commentaires/checklists, échanges et lectures sur deux sessions, fichiers autorisés/refusés/retry, notifications et préférences, reprise de l'outbox après panne, déduplication et fuseaux horaires, navigation des deep links, responsive et accessibilité clavier/mobile. Vérifier également les anciens tableaux de bord et le module documents conservés : leur disponibilité dépend des services préexistants.
 
 Limites de déploiement : broker WebSocket simple en mémoire adapté à une instance ; plusieurs instances nécessitent un broker partagé et un stockage de fichiers commun. L'historique messages utilise l'API existante non paginée et doit être borné/paginé avant de très gros volumes. La liste MIME des fichiers ne constitue pas une analyse antivirus. Aucune preuve de bon fonctionnement en environnement réel n'est revendiquée à cette étape.
+
+## Extension Phase 5
+
+Les contrôles de suppression, catégories, mentions et invitations sont décrits dans [ERP_NOTIFICATIONS_PHASE5.md](ERP_NOTIFICATIONS_PHASE5.md), qui complète ce rapport. Six scripts 01/02/03 sont fournis au total. Ils restent non exécutés.

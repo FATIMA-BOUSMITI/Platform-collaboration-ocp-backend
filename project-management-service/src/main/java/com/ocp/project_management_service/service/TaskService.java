@@ -72,7 +72,7 @@ public class TaskService {
 
         boardService.assignInitialColumn(task,request.getColumnId(),authenticatedUser);
         Task savedTask = taskRepository.save(task);
-        collaborationEvents.task(savedTask,"TASK_ASSIGNED",authenticatedUser==null?null:authenticatedUser.userId());
+        collaborationEvents.task(savedTask,savedTask.getAssigneeId()==null?"TASK_UPDATED":"TASK_ASSIGNED",authenticatedUser==null?null:authenticatedUser.userId());
         return taskMapper.toResponseDTO(savedTask);
 
        }
@@ -168,6 +168,7 @@ public class TaskService {
         if(request.getDescription()!= null) {
             task.setDescription(request.getDescription());
         }
+        UUID previousAssignee=task.getAssigneeId();
         task.setAssigneeId(request.getAssigneeId());
         if(request.getPriority()!= null) {
             task.setPriority(request.getPriority());
@@ -177,7 +178,7 @@ public class TaskService {
             task.setEstimatedTime(Duration.ofMinutes(request.getEstimatedTimeMinutes()));
         }
         Task savedTask= taskRepository.save(task);
-        collaborationEvents.task(savedTask,"TASK_UPDATED",authenticatedUser==null?null:authenticatedUser.userId());
+        collaborationEvents.task(savedTask,!java.util.Objects.equals(previousAssignee,savedTask.getAssigneeId())&&savedTask.getAssigneeId()!=null?"TASK_ASSIGNED":"TASK_UPDATED",authenticatedUser==null?null:authenticatedUser.userId());
         return taskMapper.toResponseDTO(savedTask);
 
     }
@@ -227,6 +228,7 @@ public class TaskService {
 
     }
 
+    @Transactional(readOnly=true) public java.util.Set<UUID> mentionCandidates(UUID taskId,AuthenticatedUser user){var task=taskRepository.findById(taskId).orElseThrow(()->new TaskNotFoundException(taskId.toString()));projectAccessPolicy.requireTaskRead(task,user);return collaborationEvents.mentionCandidates(task);}
     @Transactional
     public CommentDTO addComment(
             UUID taskId, CommentRequestDTO request, AuthenticatedUser authenticatedUser){
@@ -239,13 +241,15 @@ public class TaskService {
         }
         projectAccessPolicy.requireTaskWork(task, authenticatedUser);
 
+        var mentions=request.getMentionIds()==null?java.util.Set.<UUID>of():request.getMentionIds();
+        for(UUID target:mentions)if(!target.equals(task.getAssigneeId())&&!target.equals(task.getProject().getResponsibleId())&&!projectAccessPolicy.isInvited(task.getProject().getId(),target))throw new AccessDeniedException("La mention doit cibler un collaborateur autorisé sur cette tâche");
         TaskComment taskComment= TaskComment.builder()
                 .content(request.getContent())
                 .authorId(request.getAuthorId())
                 .task(task)
                 .build();
         TaskComment taskCommentSaved=taskCommentRepository.save(taskComment);
-        collaborationEvents.task(task,"TASK_COMMENT",authenticatedUser==null?null:authenticatedUser.userId());
+        collaborationEvents.comment(task,taskCommentSaved,authenticatedUser==null?request.getAuthorId():authenticatedUser.userId(),mentions);
 
         return commentMapper.toResponse(taskCommentSaved);
 

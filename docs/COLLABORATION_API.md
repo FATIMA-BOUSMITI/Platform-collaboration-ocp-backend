@@ -46,3 +46,7 @@ WebSocket : /ws ; STOMP CONNECT Authorization Bearer ; SUBSCRIBE /user/queue/mes
 Endpoint interne hors gateway : POST /api/internal/collaboration/events, JWT de service signé ; {id,userId,type,title,body,link}. Liens autorisés /projects?... et /messages?... ; types MESSAGE,TASK_ASSIGNED,TASK_UPDATED,TASK_STATUS,TASK_COMMENT,TASK_DUE. Réponse HTTP de succès sans corps.
 
 Erreurs : 400 payload invalide, 401 JWT/session invalide, 403 permission ou appartenance insuffisante, 404 ressource absente/non détenue, 409 version ou colonne incompatible, 413 limite multipart, 503 service dépendant indisponible. Les erreurs de connexion ou de droits d'une ressource ne doivent pas être interprétées comme un logout par le frontend.
+
+## Compléments de la phase 5
+
+Consulter [ERP_NOTIFICATIONS_PHASE5.md](ERP_NOTIFICATIONS_PHASE5.md) pour DELETE notifications, category, préférences mentions/invitations, mentionIds, invitations et leurs règles d’accès.

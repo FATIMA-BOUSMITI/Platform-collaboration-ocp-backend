@@ -25,7 +25,7 @@ public class TaskComment {
     @Column(name ="author_id",nullable = false)
     private UUID authorId;
 
-    @Column(nullable = false )
+    @Column(nullable = false,columnDefinition="TEXT")
     private String content ;
 
     @CreationTimestamp

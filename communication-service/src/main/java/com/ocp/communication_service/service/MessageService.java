@@ -54,6 +54,9 @@ public class MessageService {
                     authenticatedUserId.toString(), conversationId.toString());
         }
 
+        var memberIds=conversationMemberRepository.findByConversationId(conversationId).stream().map(com.ocp.communication_service.entity.ConversationMember::getUserId).collect(java.util.stream.Collectors.toSet());
+        var mentioned=request.getMentionIds()==null?java.util.Set.<UUID>of():request.getMentionIds();
+        if(!memberIds.containsAll(mentioned))throw new AccessDeniedException("Une mention doit cibler un participant de la conversation");
         Message message = Message.builder()
                 .conversationId(conversationId)
                 .senderId(request.getSenderId())
@@ -61,7 +64,7 @@ public class MessageService {
                 .build();
 
         Message savedMessage = messageRepository.saveAndFlush(message);
-        for(var member:conversationMemberRepository.findByConversationId(conversationId))if(!member.getUserId().equals(request.getSenderId()))notifications.publish(new NotificationService.Event(UUID.nameUUIDFromBytes(("message:"+savedMessage.getId()+":"+member.getUserId()).getBytes(java.nio.charset.StandardCharsets.UTF_8)),member.getUserId(),"MESSAGE","Nouveau message",request.getContent().substring(0,Math.min(180,request.getContent().length())),"/messages?conversation="+conversationId));
+        for(var member:conversationMemberRepository.findByConversationId(conversationId))if(!member.getUserId().equals(request.getSenderId()))notifications.publish(new NotificationService.Event(UUID.nameUUIDFromBytes(("message:"+savedMessage.getId()+":"+member.getUserId()).getBytes(java.nio.charset.StandardCharsets.UTF_8)),member.getUserId(),mentioned.contains(member.getUserId())?"MENTION":"MESSAGE",mentioned.contains(member.getUserId())?"Vous êtes mentionné dans un message":"Nouveau message",request.getContent().substring(0,Math.min(180,request.getContent().length())),"/messages?conversation="+conversationId));
         var response=enrich(savedMessage);
         events.send(conversationMemberRepository.findByConversationId(conversationId).stream().map(com.ocp.communication_service.entity.ConversationMember::getUserId).toList(),"messages",java.util.Map.of("kind","message","conversationId",conversationId,"message",response));
         return response;

@@ -75,6 +75,8 @@ public class TaskController {
     }
 
 
+    @GetMapping("/tasks/{id}/mention-candidates")
+    public java.util.Set<UUID> mentionCandidates(@PathVariable UUID id,@AuthenticationPrincipal AuthenticatedUser user){return taskService.mentionCandidates(id,user);}
     // GET /api/tasks/{id}
     @GetMapping("/tasks/{id}")
     public ResponseEntity<TaskResponseDTO> getTaskById(
