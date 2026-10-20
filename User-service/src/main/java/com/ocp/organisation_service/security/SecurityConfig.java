@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users/directory").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/users/directory", "/api/users/directory/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/users/auth/**").authenticated()
                 .requestMatchers("/api/users/**")
                     .access(new PermissionAccess())

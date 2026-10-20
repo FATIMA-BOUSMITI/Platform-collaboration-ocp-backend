@@ -32,6 +32,12 @@ public class CommunicationExceptionHandler {
         return error(HttpStatus.NOT_FOUND, exception, request);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> invalid(IllegalArgumentException exception,HttpServletRequest request){return error(HttpStatus.BAD_REQUEST,exception,request);}
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> status(org.springframework.web.server.ResponseStatusException exception,HttpServletRequest request){return error(HttpStatus.valueOf(exception.getStatusCode().value()),exception,request);}
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> tooLarge(org.springframework.web.multipart.MaxUploadSizeExceededException exception,HttpServletRequest request){return error(HttpStatus.PAYLOAD_TOO_LARGE,exception,request);}
     private ResponseEntity<ErrorResponse> error(
             HttpStatus status, RuntimeException exception, HttpServletRequest request) {
         ErrorResponse response = ErrorResponse.builder()

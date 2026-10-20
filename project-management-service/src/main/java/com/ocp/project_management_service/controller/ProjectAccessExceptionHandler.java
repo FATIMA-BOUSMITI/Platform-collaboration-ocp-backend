@@ -17,6 +17,10 @@ public class ProjectAccessExceptionHandler {
     private static final Logger LOGGER =
         LoggerFactory.getLogger(ProjectAccessExceptionHandler.class);
 
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String,Object>> conflict(){return ResponseEntity.status(409).body(Map.of("status",409,"message","La tâche a été modifiée. Actualisez le tableau."));}
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String,Object>> invalid(IllegalArgumentException e){return ResponseEntity.badRequest().body(Map.of("status",400,"message",String.valueOf(e.getMessage())));}
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> forbidden(
             AccessDeniedException exception, HttpServletRequest request) {

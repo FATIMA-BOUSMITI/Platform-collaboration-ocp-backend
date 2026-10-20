@@ -150,7 +150,7 @@ public class TaskService {
             task.setColumnId(null);
         }
         Task savedTask= taskRepository.save(task);
-        collaborationEvents.task(savedTask,"TASK_UPDATED",authenticatedUser==null?null:authenticatedUser.userId());
+        collaborationEvents.task(savedTask,"TASK_STATUS",authenticatedUser==null?null:authenticatedUser.userId());
         return taskMapper.toResponseDTO(savedTask);
 
     }
@@ -168,19 +168,16 @@ public class TaskService {
         if(request.getDescription()!= null) {
             task.setDescription(request.getDescription());
         }
-        if(request.getAssigneeId()!= null) {
-            task.setAssigneeId(request.getAssigneeId());
-        }
+        task.setAssigneeId(request.getAssigneeId());
         if(request.getPriority()!= null) {
             task.setPriority(request.getPriority());
         }
-        if(request.getDueDate()!= null) {
-            task.setDueDate(request.getDueDate());
-        }
+        task.setDueDate(request.getDueDate());
         if(request.getEstimatedTimeMinutes()!= null) {
             task.setEstimatedTime(Duration.ofMinutes(request.getEstimatedTimeMinutes()));
         }
         Task savedTask= taskRepository.save(task);
+        collaborationEvents.task(savedTask,"TASK_UPDATED",authenticatedUser==null?null:authenticatedUser.userId());
         return taskMapper.toResponseDTO(savedTask);
 
     }
