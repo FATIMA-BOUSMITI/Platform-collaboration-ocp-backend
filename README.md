@@ -1,6 +1,6 @@
 # Plateforme collaborative OCP — Backend
 
-Backend Spring Boot composé de microservices, exposés au frontend via une API Gateway.
+Backend de la plateforme collaborative OCP, organisé en microservices et exposé au frontend via une API Gateway.
 
 ## Services locaux
 
