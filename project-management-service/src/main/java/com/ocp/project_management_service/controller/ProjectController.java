@@ -71,14 +71,15 @@ public class ProjectController {
     }
 
 
+    public record StatusRequest(@jakarta.validation.constraints.NotNull Project.ProjectStatus status) {}
     @PatchMapping("/{id}/status")
     public ResponseEntity<ProjectResponseDTO> updateStatus(@PathVariable UUID id ,
                                                             @Valid @RequestBody
-                                                            Project.ProjectStatus status,
+                                                            StatusRequest request,
                                                             @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
 
         ProjectResponseDTO response =
-                projectService.updateStatus(id, status, authenticatedUser);
+                projectService.updateStatus(id, request.status(), authenticatedUser);
         return ResponseEntity.ok(response);
 
     }
