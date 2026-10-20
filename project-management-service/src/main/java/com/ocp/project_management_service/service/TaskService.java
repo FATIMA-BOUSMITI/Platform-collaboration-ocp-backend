@@ -47,6 +47,7 @@ public class TaskService {
     private final SubTaskMapper subTaskMapper;
     private final ProjectAccessPolicy projectAccessPolicy;
     private final BoardService boardService;
+    private final CollaborationEvents collaborationEvents;
 
     // creation
     @Transactional
@@ -71,6 +72,7 @@ public class TaskService {
 
         boardService.assignInitialColumn(task,request.getColumnId(),authenticatedUser);
         Task savedTask = taskRepository.save(task);
+        collaborationEvents.task(savedTask,"TASK_ASSIGNED",authenticatedUser==null?null:authenticatedUser.userId());
         return taskMapper.toResponseDTO(savedTask);
 
        }
@@ -148,6 +150,7 @@ public class TaskService {
             task.setColumnId(null);
         }
         Task savedTask= taskRepository.save(task);
+        collaborationEvents.task(savedTask,"TASK_UPDATED",authenticatedUser==null?null:authenticatedUser.userId());
         return taskMapper.toResponseDTO(savedTask);
 
     }
@@ -245,6 +248,7 @@ public class TaskService {
                 .task(task)
                 .build();
         TaskComment taskCommentSaved=taskCommentRepository.save(taskComment);
+        collaborationEvents.task(task,"TASK_COMMENT",authenticatedUser==null?null:authenticatedUser.userId());
 
         return commentMapper.toResponse(taskCommentSaved);
 

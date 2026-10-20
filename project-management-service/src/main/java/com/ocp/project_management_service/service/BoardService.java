@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import java.util.*;
 @Service @RequiredArgsConstructor
 public class BoardService {
- private final BoardColumnRepository columns;private final ProjectRepository projects;private final TaskRepository tasks;private final ProjectAccessPolicy access;private final TaskMapper mapper;
+ private final BoardColumnRepository columns;private final ProjectRepository projects;private final TaskRepository tasks;private final ProjectAccessPolicy access;private final TaskMapper mapper;private final CollaborationEvents events;
  public record ColumnRequest(String name,Task.TaskStatus status,Integer position){}
  public record Move(UUID columnId,Integer position,Long expectedVersion){}
  private Project project(UUID id){return projects.lockById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Projet introuvable"));}
@@ -28,7 +28,7 @@ public class BoardService {
   if(task.getVersion()!=request.expectedVersion())throw new ResponseStatusException(HttpStatus.CONFLICT,"La tâche a changé. Actualisez le tableau.");
   var c=column(task.getProject().getId(),request.columnId());
   var ordered=new ArrayList<>(tasks.findByProjectId(task.getProject().getId()).stream().filter(t->!t.getId().equals(taskId)&&(c.getId().equals(t.getColumnId())||(t.getColumnId()==null&&t.getStatus()==c.getStatus()))).sorted(Comparator.comparingLong(Task::getSortIndex).thenComparing(Task::getId)).toList());
-  int index=request.position()==null?ordered.size():Math.max(0,Math.min(request.position(),ordered.size()));ordered.add(index,task);task.setColumnId(c.getId());task.setStatus(c.getStatus());for(int i=0;i<ordered.size();i++)ordered.get(i).setSortIndex(i*1000L);tasks.saveAll(ordered);tasks.flush();return mapper.toResponseDTO(task);
+  int index=request.position()==null?ordered.size():Math.max(0,Math.min(request.position(),ordered.size()));ordered.add(index,task);task.setColumnId(c.getId());task.setStatus(c.getStatus());for(int i=0;i<ordered.size();i++)ordered.get(i).setSortIndex(i*1000L);tasks.saveAll(ordered);tasks.flush();events.task(task,"TASK_STATUS",user==null?null:user.userId());return mapper.toResponseDTO(task);
  }
  public void assignInitialColumn(Task task,UUID columnId,AuthenticatedUser user){var available=list(task.getProject().getId(),user);BoardColumn c=columnId==null?available.get(0):column(task.getProject().getId(),columnId);task.setColumnId(c.getId());task.setStatus(c.getStatus());task.setSortIndex(tasks.findByProjectId(task.getProject().getId()).stream().mapToLong(Task::getSortIndex).max().orElse(0)+1000);}
 }

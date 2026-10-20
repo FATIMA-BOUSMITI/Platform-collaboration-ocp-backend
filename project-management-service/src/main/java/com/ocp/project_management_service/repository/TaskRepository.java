@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
+    java.util.List<Task> findByDueDateLessThanEqualAndStatusNotIn(java.time.LocalDate dueDate,java.util.Collection<Task.TaskStatus> statuses);
     List<Task> findByProjectIdAndStatus(UUID id, Task.TaskStatus status);
     List<Task> findByAssigneeId(UUID userId);
     List<Task> findByProjectId(UUID id);

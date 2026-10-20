@@ -34,6 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    @Override protected boolean shouldNotFilter(HttpServletRequest request){return request.getRequestURI().equals("/api/internal/collaboration/events");}
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,

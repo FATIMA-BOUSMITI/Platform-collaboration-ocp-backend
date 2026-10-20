@@ -28,6 +28,7 @@ public class MessageService {
     private final MessageMapper messageMapper;
     private final com.ocp.communication_service.realtime.RealtimeEvents events;
     private final AttachmentService attachments;
+    private final NotificationService notifications;
 
     @Transactional
     public MessageResponseDTO sendMessage(
@@ -59,7 +60,8 @@ public class MessageService {
                 .content(request.getContent())
                 .build();
 
-        Message savedMessage = messageRepository.save(message);
+        Message savedMessage = messageRepository.saveAndFlush(message);
+        for(var member:conversationMemberRepository.findByConversationId(conversationId))if(!member.getUserId().equals(request.getSenderId()))notifications.publish(new NotificationService.Event(UUID.nameUUIDFromBytes(("message:"+savedMessage.getId()+":"+member.getUserId()).getBytes(java.nio.charset.StandardCharsets.UTF_8)),member.getUserId(),"MESSAGE","Nouveau message",request.getContent().substring(0,Math.min(180,request.getContent().length())),"/messages?conversation="+conversationId));
         var response=enrich(savedMessage);
         events.send(conversationMemberRepository.findByConversationId(conversationId).stream().map(com.ocp.communication_service.entity.ConversationMember::getUserId).toList(),"messages",java.util.Map.of("kind","message","conversationId",conversationId,"message",response));
         return response;

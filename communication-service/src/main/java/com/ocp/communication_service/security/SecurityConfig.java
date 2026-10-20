@@ -32,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/ws", "/ws/**").permitAll()
+                .requestMatchers(HttpMethod.POST,"/api/internal/collaboration/events").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class)
