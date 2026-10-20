@@ -37,4 +37,6 @@ public class ConversationMember {
     @CreationTimestamp
     @Column(name = "joined_at", nullable = false, updatable = false)
     private LocalDateTime joinedAt;
+
+    private LocalDateTime lastReadAt;
 }

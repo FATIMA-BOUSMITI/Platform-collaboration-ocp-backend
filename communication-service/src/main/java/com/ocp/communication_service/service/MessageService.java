@@ -26,6 +26,8 @@ public class MessageService {
     private final ConversationRepository conversationRepository;
     private final ConversationMemberRepository conversationMemberRepository;
     private final MessageMapper messageMapper;
+    private final com.ocp.communication_service.realtime.RealtimeEvents events;
+    private final AttachmentService attachments;
 
     @Transactional
     public MessageResponseDTO sendMessage(
@@ -58,7 +60,9 @@ public class MessageService {
                 .build();
 
         Message savedMessage = messageRepository.save(message);
-        return messageMapper.toResponse(savedMessage);
+        var response=enrich(savedMessage);
+        events.send(conversationMemberRepository.findByConversationId(conversationId).stream().map(com.ocp.communication_service.entity.ConversationMember::getUserId).toList(),"messages",java.util.Map.of("kind","message","conversationId",conversationId,"message",response));
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -74,7 +78,9 @@ public class MessageService {
         }
 
         return messageRepository.findByConversationIdOrderBySentAtAsc(conversationId).stream()
-                .map(messageMapper::toResponse)
+                .map(this::enrich)
                 .collect(Collectors.toList());
     }
+    private MessageResponseDTO enrich(Message message){var response=messageMapper.toResponse(message);response.setAttachments(attachments.list(message.getId()));response.setReadBy(conversationMemberRepository.findByConversationId(message.getConversationId()).stream().filter(m->!m.getUserId().equals(message.getSenderId())&&m.getLastReadAt()!=null&&message.getSentAt()!=null&&!m.getLastReadAt().isBefore(message.getSentAt())).map(com.ocp.communication_service.entity.ConversationMember::getUserId).toList());return response;}
+    @Transactional public void markRead(UUID conversationId,UUID user){if(user==null)throw new AccessDeniedException("Authentification requise");var member=conversationMemberRepository.findByConversationIdAndUserId(conversationId,user).orElseThrow(()->new AccessDeniedException("Conversation non accessible"));member.setLastReadAt(java.time.LocalDateTime.now());conversationMemberRepository.save(member);events.send(conversationMemberRepository.findByConversationId(conversationId).stream().map(com.ocp.communication_service.entity.ConversationMember::getUserId).toList(),"messages",java.util.Map.of("kind","receipt","conversationId",conversationId,"userId",user));}
 }

@@ -33,9 +33,16 @@ public class ConversationService {
                 && !authenticatedUserId.equals(request.getCreatorId())) {
             throw new AccessDeniedException("The creator must match the authenticated user");
         }
+
+        var ids=new java.util.HashSet<>(request.getMemberIds());ids.add(request.getCreatorId());
+        if(ids.contains(null)||ids.size()>100)throw new IllegalArgumentException("Participants invalides (100 maximum)");
+        if("PRIVATE".equals(request.getType())&&ids.size()!=2)throw new IllegalArgumentException("Une conversation privée nécessite deux participants");
+        if(!"PRIVATE".equals(request.getType())&&(request.getName()==null||request.getName().isBlank()))throw new IllegalArgumentException("Le nom du groupe est obligatoire");
+        if("PROJECT".equals(request.getType())&&request.getProjectId()==null)throw new IllegalArgumentException("Projet requis");
         Conversation conversation = Conversation.builder()
                 .type(Conversation.ConversationType.valueOf(request.getType()))
                 .name(request.getName())
+                .projectId(request.getProjectId())
                 .build();
 
         Conversation savedConversation = conversationRepository.save(conversation);
@@ -47,7 +54,7 @@ public class ConversationService {
                 .build();
         conversationMemberRepository.save(creatorMember);
 
-        for (UUID memberId : request.getMemberIds()) {
+        for (UUID memberId : ids) {
             if (!memberId.equals(request.getCreatorId())) {
                 ConversationMember member = ConversationMember.builder()
                         .conversationId(savedConversation.getId())

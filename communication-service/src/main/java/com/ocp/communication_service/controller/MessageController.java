@@ -20,6 +20,7 @@ import java.util.UUID;
 public class MessageController {
 
     private final MessageService messageService;
+    @PatchMapping("/read") @ResponseStatus(HttpStatus.NO_CONTENT) public void read(@PathVariable UUID conversationId,@AuthenticationPrincipal AuthenticatedUser user){messageService.markRead(conversationId,user==null?null:user.userId());}
 
     @PostMapping
     public ResponseEntity<MessageResponseDTO> sendMessage(

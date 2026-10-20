@@ -27,8 +27,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final SecretKey signingKey;
+    private final com.ocp.communication_service.realtime.AuthContextClient auth;
 
-    public JwtAuthenticationFilter(@Value("${jwt.secret}") String secret) {
+    public JwtAuthenticationFilter(@Value("${jwt.secret}") String secret,com.ocp.communication_service.realtime.AuthContextClient auth) {
+        this.auth=auth;
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -58,13 +60,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || userIdClaim == null) {
                 throw new JwtException("Required access-token claims are missing");
             }
-            AuthenticatedUser principal = new AuthenticatedUser(
-                claims.getSubject(), UUID.fromString(userIdClaim), role);
+            var current=auth.resolve(authorization);
+            if(current==null||!current.userId().toString().equals(userIdClaim))throw new JwtException("Session invalide");
+            role=current.role();
+            AuthenticatedUser principal = new AuthenticatedUser(current.email(),current.userId(),role);
             role = role.trim().toUpperCase();
             String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
             SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(
                     principal, null, List.of(new SimpleGrantedAuthority(authority))));
+        } catch (org.springframework.web.client.RestClientResponseException exception) {
+            response.setStatus(exception.getStatusCode().is4xxClientError()?401:503);return;
+        } catch (org.springframework.web.client.ResourceAccessException exception) {
+            response.setStatus(503);return;
         } catch (JwtException | IllegalArgumentException exception) {
             SecurityContextHolder.clearContext();
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED,

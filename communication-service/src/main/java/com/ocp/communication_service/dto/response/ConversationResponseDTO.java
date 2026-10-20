@@ -14,5 +14,6 @@ public class ConversationResponseDTO {
     private UUID id;
     private String type;
     private String name;
+    private UUID projectId;
     private LocalDateTime createdAt;
 }
