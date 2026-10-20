@@ -12,7 +12,12 @@ public interface TeamMemberRepository
 	extends JpaRepository<TeamMember, UUID> {
 
 
-	List<TeamMember> findByUserId(UUID userId);
+	List<TeamMember> findByTeamId(UUID teamId);
+ void deleteByTeamId(UUID teamId);
+ boolean existsByTeamIdAndUserId(UUID teamId,UUID userId);
+ void deleteByTeamIdAndUserId(UUID teamId,UUID userId);
+ List<TeamMember> findByUserId(UUID userId);
 
+	void deleteByUserId(UUID userId);
 
 }

@@ -5,10 +5,12 @@ import com.ocp.communication_service.dto.response.ConversationResponseDTO;
 import com.ocp.communication_service.entity.Conversation;
 import com.ocp.communication_service.entity.ConversationMember;
 import com.ocp.communication_service.exception.ConversationNotFoundException;
+import com.ocp.communication_service.exception.NotConversationMemberException;
 import com.ocp.communication_service.mapper.ConversationMapper;
 import com.ocp.communication_service.repository.ConversationMemberRepository;
 import com.ocp.communication_service.repository.ConversationRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,12 @@ public class ConversationService {
     private final ConversationMapper conversationMapper;
 
     @Transactional
-    public ConversationResponseDTO createConversation(CreateConversationRequestDTO request) {
+    public ConversationResponseDTO createConversation(
+            CreateConversationRequestDTO request, UUID authenticatedUserId) {
+        if (authenticatedUserId != null
+                && !authenticatedUserId.equals(request.getCreatorId())) {
+            throw new AccessDeniedException("The creator must match the authenticated user");
+        }
         Conversation conversation = Conversation.builder()
                 .type(Conversation.ConversationType.valueOf(request.getType()))
                 .name(request.getName())
@@ -55,9 +62,12 @@ public class ConversationService {
     }
 
     @Transactional(readOnly = true)
-    public ConversationResponseDTO getConversationById(UUID id) {
+    public ConversationResponseDTO getConversationById(UUID id, UUID authenticatedUserId) {
         Conversation conversation = conversationRepository.findById(id)
                 .orElseThrow(() -> new ConversationNotFoundException(id.toString()));
+        if (authenticatedUserId != null) {
+            requireMembership(id, authenticatedUserId);
+        }
         return conversationMapper.toResponse(conversation);
     }
 
@@ -73,13 +83,23 @@ public class ConversationService {
     }
 
     @Transactional
-    public void addMember(UUID conversationId, UUID userId) {
+    public void addMember(UUID conversationId, UUID userId, UUID authenticatedUserId) {
         if (!conversationRepository.existsById(conversationId)) {
             throw new ConversationNotFoundException(conversationId.toString());
         }
 
+        if (authenticatedUserId != null) {
+            ConversationMember actor = conversationMemberRepository
+                    .findByConversationIdAndUserId(conversationId, authenticatedUserId)
+                    .orElseThrow(() -> new NotConversationMemberException(
+                            authenticatedUserId.toString(), conversationId.toString()));
+            if (actor.getRole() != ConversationMember.MemberRole.ADMIN) {
+                throw new AccessDeniedException("Only conversation admins can add members");
+            }
+        }
+
         if (conversationMemberRepository.existsByConversationIdAndUserId(conversationId, userId)) {
-            return; // déjà membre, rien à faire — idempotent
+            return;
         }
 
         ConversationMember member = ConversationMember.builder()
@@ -88,5 +108,11 @@ public class ConversationService {
                 .role(ConversationMember.MemberRole.MEMBER)
                 .build();
         conversationMemberRepository.save(member);
+    }
+
+    private void requireMembership(UUID conversationId, UUID userId) {
+        if (!conversationMemberRepository.existsByConversationIdAndUserId(conversationId, userId)) {
+            throw new NotConversationMemberException(userId.toString(), conversationId.toString());
+        }
     }
 }

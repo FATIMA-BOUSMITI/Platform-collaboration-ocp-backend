@@ -13,11 +13,16 @@ public class UserCreateRequestDTO {
 	// id venant de Auth-Service
 
 
-	private String firstName;
+	@jakarta.validation.constraints.NotBlank
+ @jakarta.validation.constraints.Size(min=1,max=150)
+ private String firstName;
 
 
-	private String lastName;
-	private String email;
+	@jakarta.validation.constraints.Size(min=1,max=150)
+ private String lastName;
+	@jakarta.validation.constraints.NotBlank
+ @jakarta.validation.constraints.Email
+ private String email;
 
 
 	private String phone;
@@ -36,7 +41,9 @@ public class UserCreateRequestDTO {
 
 
 	private String timezone;
-	private UUID departement;
-	private UUID roleId;
+	@jakarta.validation.constraints.NotNull
+ private UUID departement;
+	@jakarta.validation.constraints.NotNull
+ private UUID roleId;
 
 }

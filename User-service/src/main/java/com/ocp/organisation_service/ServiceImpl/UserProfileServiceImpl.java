@@ -3,6 +3,7 @@ package com.ocp.organisation_service.ServiceImpl;
 import com.ocp.organisation_service.client.AuthClient;
 import com.ocp.organisation_service.dto.request.*;
 import com.ocp.organisation_service.dto.response.AuthUserResponse;
+import com.ocp.organisation_service.dto.response.AuthUserRoleAssignmentResponse;
 import com.ocp.organisation_service.dto.response.DepartementResponseDTO;
 import com.ocp.organisation_service.dto.response.RoleResponseDTO;
 import com.ocp.organisation_service.dto.response.UserResponseDTO;
@@ -10,21 +11,31 @@ import com.ocp.organisation_service.entity.Departement;
 import com.ocp.organisation_service.entity.UserProfile;
 import com.ocp.organisation_service.mappers.UserMapper;
 import com.ocp.organisation_service.repository.DepartementRepository;
+import com.ocp.organisation_service.repository.TeamMemberRepository;
 import com.ocp.organisation_service.repository.UserProfileRepository;
 import com.ocp.organisation_service.services.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserProfileServiceImpl implements UserProfileService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserProfileServiceImpl.class);
+
 	private final UserProfileRepository repository;
 	private final DepartementRepository departementRepository;
+	private final TeamMemberRepository teamMemberRepository;
 	private final UserMapper mapper;
 	private final AuthClient authClient;
 
@@ -55,21 +66,28 @@ public class UserProfileServiceImpl implements UserProfileService {
 		user.setDepartement(departement);
 
 		UserProfile saved = repository.save(user);
-		return mapper.toResponse(saved);
+		UserResponseDTO result=mapper.toResponse(saved);
+ var createdRole=new RoleResponseDTO();createdRole.setId(request.getRoleId());result.setRoles(List.of(createdRole));
+ return result;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<UserResponseDTO> getAllUsers() {
-		return repository.findAll().stream().map(user -> {
-			List<RoleResponseDTO> roles = List.of();
-			try {
-				if (user.getAuthUserId() != null) {
-					roles = authClient.getRolesByUserId(user.getAuthUserId());
-				}
-			} catch (Exception ignored) {
-				System.out.println("Pas de rôle pour : " + user.getEmail());
-			}
+		long startedAt = System.nanoTime();
+		List<UserProfile> profiles = repository.findAll();
+		List<AuthUserRoleAssignmentResponse> assignments = authClient.getAllUserRoleAssignments();
+		Map<UUID, RoleResponseDTO> rolesByUserId = assignments
+			.stream()
+			.collect(Collectors.toMap(
+				AuthUserRoleAssignmentResponse::userId,
+				this::toRoleResponse,
+				(existingRole, duplicateRole) -> existingRole));
+
+		List<UserResponseDTO> responses = profiles.stream().map(user -> {
+			RoleResponseDTO role = user.getAuthUserId() == null
+				? null
+				: rolesByUserId.get(user.getAuthUserId());
 
 			return UserResponseDTO.builder()
 				.id(user.getId())
@@ -85,9 +103,23 @@ public class UserProfileServiceImpl implements UserProfileService {
 					.id(user.getDepartement().getId())
 					.name(user.getDepartement().getName())
 					.build() : null)
-				.roles(roles)
+				.roles(role == null ? List.of() : List.of(role))
 				.build();
 		}).toList();
+		LOGGER.info(
+			"Loaded {} user profiles and {} authentication role assignments in {} ms",
+			profiles.size(),
+			assignments.size(),
+			(System.nanoTime() - startedAt) / 1_000_000);
+		return responses;
+	}
+
+	private RoleResponseDTO toRoleResponse(AuthUserRoleAssignmentResponse assignment) {
+		RoleResponseDTO role = new RoleResponseDTO();
+		role.setId(assignment.roleId());
+		role.setName(assignment.roleName());
+		role.setDescription(assignment.roleDescription());
+		return role;
 	}
 
 	@Override
@@ -114,7 +146,10 @@ public class UserProfileServiceImpl implements UserProfileService {
 	@Transactional(readOnly = true)
 	public UserResponseDTO getUserByAuthUserId(UUID authUserId) {
 		UserProfile user = repository.findByAuthUserId(authUserId)
-			.orElseThrow(() -> new RuntimeException("User not found with authUserId: " + authUserId));
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				"User profile not found for authentication account"
+			));
 
 		List<RoleResponseDTO> roles = List.of();
 		try {
@@ -154,13 +189,16 @@ public class UserProfileServiceImpl implements UserProfileService {
 
 		UserProfile updatedUser = repository.save(user);
 
-		if (request.getRoleId() != null && user.getAuthUserId() != null) {
+		if ((request.getRoleId() != null || request.getEmail() != null) && user.getAuthUserId() != null) {
 			UpdateAuthUserRequest authRequest = new UpdateAuthUserRequest();
 			authRequest.setRoleId(request.getRoleId());
+ authRequest.setEmail(request.getEmail());
 			authClient.updateUser(user.getAuthUserId(), authRequest);
 		}
 
-		return mapper.toResponse(updatedUser);
+		UserResponseDTO response=mapper.toResponse(updatedUser);
+ if(user.getAuthUserId()!=null) response.setRoles(authClient.getRolesByUserId(user.getAuthUserId()));
+ return response;
 	}
 
 	@Override
@@ -169,8 +207,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 		UserProfile user = repository.findById(id)
 			.orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
+		LOGGER.info(
+			"Deleting user profile id={} with linked authentication userId={}",
+			user.getId(),
+			user.getAuthUserId());
+		teamMemberRepository.deleteByUserId(user.getId());
+
 		if (user.getAuthUserId() != null) {
-			authClient.deleteUser(user.getAuthUserId());
+			authClient.deleteUserByUserId(user.getAuthUserId());
 		}
 
 		repository.delete(user);

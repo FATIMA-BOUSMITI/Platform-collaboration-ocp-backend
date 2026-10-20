@@ -18,6 +18,7 @@ import java.util.UUID;
 public class DepartementServiceImp implements DepartementService {
 	private final DepartementRepository departementRepository;
 	private final DepartementMapper mapper;
+ private final com.ocp.organisation_service.repository.UserProfileRepository users;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -39,7 +40,8 @@ public class DepartementServiceImp implements DepartementService {
 	@Override
 	@Transactional
 	public DepartementResponseDTO createDepartement(DepartementRequestDTO request) {
-		Departement departement = mapper.toEntity(request);
+		validateManager(request);
+ Departement departement = mapper.toEntity(request);
 		Departement saved = departementRepository.save(departement);
 		return mapper.toResponse(saved);
 	}
@@ -50,7 +52,8 @@ public class DepartementServiceImp implements DepartementService {
 		Departement departement = departementRepository.findById(id)
 			.orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
 
-		if (request.getName() != null) departement.setName(request.getName());
+		validateManager(request);
+        if (request.getName() != null) departement.setName(request.getName());
 		if (request.getCode() != null) departement.setCode(request.getCode());
 		if (request.getDescription() != null) departement.setDescription(request.getDescription());
 		if (request.getManagerId() != null) departement.setManagerId(request.getManagerId());
@@ -64,6 +67,8 @@ public class DepartementServiceImp implements DepartementService {
 	public void deleteDepartement(UUID id) {
 		Departement departement = departementRepository.findById(id)
 			.orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
-		departementRepository.delete(departement);
+		if(!departement.getUsers().isEmpty() || !departement.getTeams().isEmpty())throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Réaffectez les utilisateurs et les équipes avant de supprimer ce département.");
+ departementRepository.delete(departement);
 	}
+ private void validateManager(DepartementRequestDTO r){if(r.getManagerId()!=null && !users.existsById(r.getManagerId()))throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Responsable introuvable");}
 }

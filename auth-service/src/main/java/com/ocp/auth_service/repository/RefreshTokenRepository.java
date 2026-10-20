@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface RefreshTokenRepository
 	extends JpaRepository<RefreshToken, UUID> {
+	long countByRevokedFalseAndExpiryDateAfter(LocalDateTime now);
 	Optional<RefreshToken> findByRefreshToken(String refreshToken);
 	List<RefreshToken> findByUser(UserCredential user);
 	List<RefreshToken> findByUserAndRevokedFalse(UserCredential user);

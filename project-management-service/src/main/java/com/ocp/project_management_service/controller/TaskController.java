@@ -7,11 +7,13 @@ import com.ocp.project_management_service.dto.response.CommentDTO;
 import com.ocp.project_management_service.dto.response.SubTaskDTO;
 import com.ocp.project_management_service.dto.response.TaskResponseDTO;
 import com.ocp.project_management_service.entity.Task;
+import com.ocp.project_management_service.security.AuthenticatedUser;
 import com.ocp.project_management_service.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +30,11 @@ public class TaskController {
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskResponseDTO> createTask(
             @PathVariable UUID projectId,
-            @Valid @RequestBody TaskRequestDTO request) {
+            @Valid @RequestBody TaskRequestDTO request,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         TaskResponseDTO response =
-                taskService.createTask(projectId, request);
+                taskService.createTask(projectId, request, authenticatedUser);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -55,14 +58,16 @@ public class TaskController {
     @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<List<TaskResponseDTO>> getTasksByProject(
             @PathVariable UUID projectId,
-            @RequestParam(required = false) Task.TaskStatus status) {
+            @RequestParam(required = false) Task.TaskStatus status,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         List<TaskResponseDTO> response;
 
         if (status != null) {
-            response = taskService.getTasksByProjectAndStatus(projectId, status);
+            response = taskService.getTasksByProjectAndStatus(
+                    projectId, status, authenticatedUser);
         } else {
-            response = taskService.getTasksByProject(projectId);
+            response = taskService.getTasksByProject(projectId, authenticatedUser);
         }
 
         return ResponseEntity.ok(response);
@@ -72,10 +77,11 @@ public class TaskController {
     // GET /api/tasks/{id}
     @GetMapping("/tasks/{id}")
     public ResponseEntity<TaskResponseDTO> getTaskById(
-            @PathVariable UUID id) {
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         TaskResponseDTO response =
-                taskService.getTaskById(id);
+                taskService.getTaskById(id, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }
@@ -84,10 +90,11 @@ public class TaskController {
     // GET /api/tasks/assignee/{userId}
     @GetMapping("/tasks/assignee/{userId}")
     public ResponseEntity<List<TaskResponseDTO>> getTasksByAssignee(
-            @PathVariable UUID userId) {
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         List<TaskResponseDTO> response =
-                taskService.getTasksByAssignee(userId);
+                taskService.getTasksByAssignee(userId, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }
@@ -97,10 +104,11 @@ public class TaskController {
     @PutMapping("/tasks/{id}")
     public ResponseEntity<TaskResponseDTO> updateTask(
             @PathVariable UUID id,
-            @Valid @RequestBody TaskRequestDTO request) {
+            @Valid @RequestBody TaskRequestDTO request,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         TaskResponseDTO response =
-                taskService.updateTask(id, request);
+                taskService.updateTask(id, request, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }
@@ -110,10 +118,11 @@ public class TaskController {
     @PatchMapping("/tasks/{id}/status")
     public ResponseEntity<TaskResponseDTO> updateTaskStatus(
             @PathVariable UUID id,
-            @RequestBody Task.TaskStatus status) {
+            @RequestBody Task.TaskStatus status,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         TaskResponseDTO response =
-                taskService.updateTaskStatus(id, status);
+                taskService.updateTaskStatus(id, status, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }
@@ -122,10 +131,11 @@ public class TaskController {
     @PostMapping("/tasks/{taskId}/subtasks")
     public ResponseEntity<SubTaskDTO> addSubTask(
             @PathVariable UUID taskId,
-            @Valid @RequestBody SubTaskRequestDTO request) {
+            @Valid @RequestBody SubTaskRequestDTO request,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         SubTaskDTO response =
-                taskService.addSubTask(taskId, request);
+                taskService.addSubTask(taskId, request, authenticatedUser);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -136,10 +146,11 @@ public class TaskController {
     // GET /api/tasks/{taskId}/subtasks
     @GetMapping("/tasks/{taskId}/subtasks")
     public ResponseEntity<List<SubTaskDTO>> getSubTasks(
-            @PathVariable UUID taskId) {
+            @PathVariable UUID taskId,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         List<SubTaskDTO> response =
-                taskService.getSubTasksByTask(taskId);
+                taskService.getSubTasksByTask(taskId, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }
@@ -148,10 +159,11 @@ public class TaskController {
     // PATCH /api/subtasks/{id}/toggle
     @PatchMapping("/subtasks/{id}/toggle")
     public ResponseEntity<SubTaskDTO> toggleSubTask(
-            @PathVariable UUID id) {
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         SubTaskDTO response =
-                taskService.toggleSubTaskDone(id);
+                taskService.toggleSubTaskDone(id, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }
@@ -160,10 +172,11 @@ public class TaskController {
     @PostMapping("/tasks/{taskId}/comments")
     public ResponseEntity<CommentDTO> addComment(
             @PathVariable UUID taskId,
-            @Valid @RequestBody CommentRequestDTO request) {
+            @Valid @RequestBody CommentRequestDTO request,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         CommentDTO response =
-                taskService.addComment(taskId, request);
+                taskService.addComment(taskId, request, authenticatedUser);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -174,10 +187,11 @@ public class TaskController {
 
     @GetMapping("/tasks/{taskId}/comments")
     public ResponseEntity<List<CommentDTO>> getComments(
-            @PathVariable UUID taskId) {
+            @PathVariable UUID taskId,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
 
         List<CommentDTO> response =
-                taskService.getCommentsByTask(taskId);
+                taskService.getCommentsByTask(taskId, authenticatedUser);
 
         return ResponseEntity.ok(response);
     }

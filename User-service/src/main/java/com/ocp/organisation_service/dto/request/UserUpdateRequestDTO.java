@@ -8,9 +8,12 @@ import java.util.UUID;
 public class UserUpdateRequestDTO {
 
 	// UserProfile
-	private String firstName;
-	private String lastName;
-	private String email;
+	@jakarta.validation.constraints.Size(min=1,max=150)
+ private String firstName;
+	@jakarta.validation.constraints.Size(min=1,max=150)
+ private String lastName;
+	@jakarta.validation.constraints.Email
+ private String email;
 	private String phone;
 	private String photoUrl;
 	private String position;

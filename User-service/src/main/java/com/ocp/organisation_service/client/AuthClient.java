@@ -5,19 +5,8 @@ import com.ocp.organisation_service.dto.request.AssignRoleRequest;
 import com.ocp.organisation_service.dto.request.CreateCredentialRequest;
 import com.ocp.organisation_service.dto.request.UpdateAuthUserRequest;
 import com.ocp.organisation_service.dto.response.AuthUserResponse;
+import com.ocp.organisation_service.dto.response.AuthUserRoleAssignmentResponse;
 import com.ocp.organisation_service.dto.response.RoleResponseDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
-
-import java.util.List;
-import java.util.UUID;
-
-
-
-import com.ocp.organisation_service.dto.request.CreateCredentialRequest;
-import com.ocp.organisation_service.dto.response.AuthUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -50,6 +39,14 @@ public class AuthClient {
 		return role == null ? List.of() : List.of(role);
 	}
 
+	public List<AuthUserRoleAssignmentResponse> getAllUserRoleAssignments() {
+		List<AuthUserRoleAssignmentResponse> assignments = restClient.get()
+			.uri("/api/auth/users/role-assignments")
+			.retrieve()
+			.body(new ParameterizedTypeReference<>() {});
+		return assignments == null ? List.of() : assignments;
+	}
+
 	public AuthUserResponse assignRole(AssignRoleRequest request) {
 		return restClient
 			.post()
@@ -68,13 +65,10 @@ public class AuthClient {
 			.body(AuthUserResponse.class);
 	}
 
-	public void deleteUser(UUID id) {
+	public void deleteUserByUserId(UUID userId) {
 		restClient.delete()
-			.uri("/api/auth/users/{id}", id)
+			.uri("/api/auth/users/user/{userId}", userId)
 			.retrieve()
 			.toBodilessEntity();
 	}
 }
-
-
-

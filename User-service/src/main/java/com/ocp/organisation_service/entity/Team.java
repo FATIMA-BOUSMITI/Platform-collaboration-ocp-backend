@@ -16,6 +16,8 @@ public class Team {
 
 
 	private String name;
+ private String objective;
+ private Boolean active = true;
 
 
 	@ManyToOne

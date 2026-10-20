@@ -20,7 +20,10 @@ import com.ocp.project_management_service.repository.ProjectRepository;
 import com.ocp.project_management_service.repository.SubTaskRepository;
 import com.ocp.project_management_service.repository.TaskCommentRepository;
 import com.ocp.project_management_service.repository.TaskRepository;
+import com.ocp.project_management_service.security.AuthenticatedUser;
+import com.ocp.project_management_service.security.ProjectAccessPolicy;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,14 +45,17 @@ public class TaskService {
     private  final TaskCommentRepository taskCommentRepository;
     private  final CommentMapper commentMapper ;
     private final SubTaskMapper subTaskMapper;
+    private final ProjectAccessPolicy projectAccessPolicy;
 
     // creation
     @Transactional
-    public TaskResponseDTO createTask(UUID projectId, TaskRequestDTO request){
+    public TaskResponseDTO createTask(
+            UUID projectId, TaskRequestDTO request, AuthenticatedUser authenticatedUser){
 
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFoundException(projectId.toString()));
+        projectAccessPolicy.requireProjectManagement(project, authenticatedUser);
 
            Task task = Task.builder().
                 title(request.getTitle()).
@@ -68,19 +74,25 @@ public class TaskService {
 
 
     @Transactional(readOnly = true)
-    public TaskResponseDTO getTaskById(UUID id){
+    public TaskResponseDTO getTaskById(UUID id, AuthenticatedUser authenticatedUser){
 
         Task task = taskRepository.findById(id).orElseThrow(
                 ()->new TaskNotFoundException(id.toString())
         );
+        projectAccessPolicy.requireTaskRead(task, authenticatedUser);
         return taskMapper.toResponseDTO(task);
     }
 
 
     @Transactional(readOnly = true)
-    public List<TaskResponseDTO> getTasksByProject(UUID projectId){
+    public List<TaskResponseDTO> getTasksByProject(
+            UUID projectId, AuthenticatedUser authenticatedUser){
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId.toString()));
+        projectAccessPolicy.requireProjectRead(project, authenticatedUser);
 
-        return  taskRepository.findByProjectId(projectId).stream()
+        return taskRepository.findByProjectId(projectId).stream()
+                .filter(task -> projectAccessPolicy.canReadTask(task, authenticatedUser))
                 .map(taskMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -88,9 +100,14 @@ public class TaskService {
 
 
     @Transactional(readOnly = true)
-    public List<TaskResponseDTO> getTasksByProjectAndStatus(UUID projectId, Task.TaskStatus status){
+    public List<TaskResponseDTO> getTasksByProjectAndStatus(
+            UUID projectId, Task.TaskStatus status, AuthenticatedUser authenticatedUser){
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId.toString()));
+        projectAccessPolicy.requireProjectRead(project, authenticatedUser);
 
-        return  taskRepository.findByProjectIdAndStatus(projectId,status).stream()
+        return taskRepository.findByProjectIdAndStatus(projectId, status).stream()
+                .filter(task -> projectAccessPolicy.canReadTask(task, authenticatedUser))
                 .map(taskMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -98,8 +115,17 @@ public class TaskService {
 
      //mes taches
     @Transactional(readOnly = true)
-    public List<TaskResponseDTO> getTasksByAssignee(UUID userId){
-        return  taskRepository.findByAssigneeId(userId).stream()
+    public List<TaskResponseDTO> getTasksByAssignee(
+            UUID userId, AuthenticatedUser authenticatedUser){
+        if (authenticatedUser != null
+                && !authenticatedUser.isAdministratorOrDirector()
+                && !authenticatedUser.isManager()
+                && !(authenticatedUser.isEmployee()
+                    && authenticatedUser.userId().equals(userId))) {
+            throw new AccessDeniedException("Task assignments are not visible to this user");
+        }
+        return taskRepository.findByAssigneeId(userId).stream()
+                .filter(task -> projectAccessPolicy.canReadTask(task, authenticatedUser))
                 .map(taskMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -108,10 +134,12 @@ public class TaskService {
 
     //UPDATE
     @Transactional
-    public TaskResponseDTO updateTaskStatus(UUID id, Task.TaskStatus status){
+    public TaskResponseDTO updateTaskStatus(
+            UUID id, Task.TaskStatus status, AuthenticatedUser authenticatedUser){
         Task task = taskRepository.findById(id).orElseThrow(
                 ()-> new TaskNotFoundException(id.toString())
         );
+        projectAccessPolicy.requireTaskStatusChange(task, authenticatedUser);
         if(status!= null) {
             task.setStatus(status);
         }
@@ -121,10 +149,12 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponseDTO updateTask(UUID id, TaskRequestDTO request){
+    public TaskResponseDTO updateTask(
+            UUID id, TaskRequestDTO request, AuthenticatedUser authenticatedUser){
         Task task = taskRepository.findById(id).orElseThrow(
                 ()-> new TaskNotFoundException(id.toString())
         );
+        projectAccessPolicy.requireTaskManagement(task, authenticatedUser);
         if(request.getTitle()!= null) {
             task.setTitle(request.getTitle());
         }
@@ -149,11 +179,13 @@ public class TaskService {
     }
 
     @Transactional
-    public SubTaskDTO addSubTask(UUID taskId, SubTaskRequestDTO request){
+    public SubTaskDTO addSubTask(
+            UUID taskId, SubTaskRequestDTO request, AuthenticatedUser authenticatedUser){
 
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId.toString()));
+        projectAccessPolicy.requireTaskWork(task, authenticatedUser);
 
         SubTask subTask= SubTask.builder()
                 .title(request.getTitle())
@@ -166,12 +198,13 @@ public class TaskService {
     }
 
     @Transactional
-    public SubTaskDTO toggleSubTaskDone(UUID subTaskId){
+    public SubTaskDTO toggleSubTaskDone(UUID subTaskId, AuthenticatedUser authenticatedUser){
 
 
         SubTask subTask= subTaskRepository.findById(subTaskId).orElseThrow(
                 ()-> new SubTaskNotFoundException(subTaskId.toString())
         );
+        projectAccessPolicy.requireTaskStatusChange(subTask.getTask(), authenticatedUser);
 
         subTask.setDone(!subTask.isDone());
         SubTask subTask1 = subTaskRepository.save(subTask);
@@ -180,21 +213,27 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<SubTaskDTO> getSubTasksByTask(UUID taskId){
-
-        if(!taskRepository.existsById(taskId)){
-            throw new TaskNotFoundException(taskId.toString());
-        }
+    public List<SubTaskDTO> getSubTasksByTask(
+            UUID taskId, AuthenticatedUser authenticatedUser){
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId.toString()));
+        projectAccessPolicy.requireTaskRead(task, authenticatedUser);
         return subTaskRepository.findByTaskId(taskId).stream()
                 .map(subTaskMapper::toResponseDTO).collect(Collectors.toList());
 
     }
 
     @Transactional
-    public CommentDTO addComment(UUID taskId, CommentRequestDTO request){
+    public CommentDTO addComment(
+            UUID taskId, CommentRequestDTO request, AuthenticatedUser authenticatedUser){
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId.toString()));
 
+        if (authenticatedUser != null
+                && !authenticatedUser.userId().equals(request.getAuthorId())) {
+            throw new AccessDeniedException("Comment author must match the authenticated user");
+        }
+        projectAccessPolicy.requireTaskWork(task, authenticatedUser);
 
         TaskComment taskComment= TaskComment.builder()
                 .content(request.getContent())
@@ -208,11 +247,12 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-     public List<CommentDTO> getCommentsByTask(UUID taskId){
+     public List<CommentDTO> getCommentsByTask(
+             UUID taskId, AuthenticatedUser authenticatedUser){
 
-        if(!taskRepository.existsById(taskId)){
-            throw new TaskNotFoundException(taskId.toString());
-        }
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId.toString()));
+        projectAccessPolicy.requireTaskRead(task, authenticatedUser);
 
         return taskCommentRepository.findByTaskIdOrderByCreatedAtAsc(taskId).stream()
                 .map(commentMapper::toResponse).

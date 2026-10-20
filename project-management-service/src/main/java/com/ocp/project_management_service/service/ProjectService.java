@@ -8,6 +8,8 @@ import com.ocp.project_management_service.exception.ProjectNotCompletedException
 import com.ocp.project_management_service.exception.ProjectNotFoundException;
 import com.ocp.project_management_service.mapper.ProjectMapper;
 import com.ocp.project_management_service.repository.ProjectRepository;
+import com.ocp.project_management_service.security.AuthenticatedUser;
+import com.ocp.project_management_service.security.ProjectAccessPolicy;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +25,14 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository ;
     private final ProjectMapper projectMapper;
+    private final ProjectAccessPolicy projectAccessPolicy;
 
     //CREATION
     @Transactional
-    public ProjectResponseDTO createProject(ProjectRequestDTO request){
+    public ProjectResponseDTO createProject(
+            ProjectRequestDTO request, AuthenticatedUser authenticatedUser){
+        projectAccessPolicy.requireProjectAssignment(
+                request.getResponsibleId(), authenticatedUser);
 
 
         if (!request.getEndDate().isAfter(request.getStartDate())) {
@@ -53,32 +59,39 @@ public class ProjectService {
 
     //LECTURE
     @Transactional(readOnly = true)
-    public ProjectResponseDTO getProjectById(UUID id){
+    public ProjectResponseDTO getProjectById(UUID id, AuthenticatedUser authenticatedUser){
           Project project= projectRepository.findById(id).orElseThrow(
                   () ->  new ProjectNotFoundException(id.toString()));
+        projectAccessPolicy.requireProjectRead(project, authenticatedUser);
         return  projectMapper.toResponseDTO(project);
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectResponseDTO> getAllProjects(){
-        return projectRepository.findAll().stream()
+    public List<ProjectResponseDTO> getAllProjects(AuthenticatedUser authenticatedUser){
+        return projectAccessPolicy.readableProjects(
+                    projectRepository.findAll(), authenticatedUser).stream()
                 .map(projectMapper::toResponseDTO).collect(Collectors.toList());
 
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectResponseDTO>  getProjectsByDepartment(UUID departmentId){
-         return projectRepository.findByDepartmentId(departmentId).stream()
+    public List<ProjectResponseDTO> getProjectsByDepartment(
+            UUID departmentId, AuthenticatedUser authenticatedUser){
+         return projectAccessPolicy.readableProjects(
+                    projectRepository.findByDepartmentId(departmentId), authenticatedUser).stream()
                  .map(projectMapper::toResponseDTO).collect(Collectors.toList());
+
     }
 
     //UPDATE
     @Transactional
-    public  ProjectResponseDTO updateProject(UUID id, ProjectUpdateRequestDTO request){
+    public ProjectResponseDTO updateProject(
+            UUID id, ProjectUpdateRequestDTO request, AuthenticatedUser authenticatedUser){
 
         Project project = projectRepository.findById(id).orElseThrow(
                 ()-> new ProjectNotFoundException(id.toString())
         );
+        projectAccessPolicy.requireProjectManagement(project, authenticatedUser);
 
         if (request.getName() != null) {
             project.setName(request.getName());
@@ -87,6 +100,8 @@ public class ProjectService {
             project.setDescription(request.getDescription());
         }
         if (request.getResponsibleId() != null) {
+            projectAccessPolicy.requireProjectAssignment(
+                    request.getResponsibleId(), authenticatedUser);
             project.setResponsibleId(request.getResponsibleId());
         }
         if (request.getStartDate() != null) {
@@ -110,10 +125,12 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectResponseDTO updateStatus(UUID id, Project.ProjectStatus status){
+    public ProjectResponseDTO updateStatus(
+            UUID id, Project.ProjectStatus status, AuthenticatedUser authenticatedUser){
         Project project = projectRepository.findById(id).orElseThrow(
                 ()-> new ProjectNotFoundException(id.toString())
         );
+        projectAccessPolicy.requireProjectManagement(project, authenticatedUser);
         project.setStatus(status);
         Project savedProject = projectRepository.save(project);
         return projectMapper.toResponseDTO(savedProject);
@@ -121,11 +138,12 @@ public class ProjectService {
 
     //ARCHIVE
     @Transactional
-     public void archiveProject(UUID id){
+    public void archiveProject(UUID id, AuthenticatedUser authenticatedUser){
          Project project = projectRepository.findById(id).orElseThrow(
                  ()-> new ProjectNotFoundException(id.toString())
          );
-         if(project.getStatus()!=Project.ProjectStatus.COMPLETED){
+        projectAccessPolicy.requireProjectManagement(project, authenticatedUser);
+        if(project.getStatus()!=Project.ProjectStatus.COMPLETED){
             throw  new ProjectNotCompletedException(id.toString());
          }
          project.setStatus(Project.ProjectStatus.ARCHIVED);
@@ -134,11 +152,12 @@ public class ProjectService {
 
      //DELETE
      @Transactional
-    public void deleteProject(UUID id){
+    public void deleteProject(UUID id, AuthenticatedUser authenticatedUser){
 
         Project project = projectRepository.findById(id).orElseThrow(
                 ()-> new ProjectNotFoundException(id.toString())
         );
+        projectAccessPolicy.requireProjectManagement(project, authenticatedUser);
         projectRepository.delete(project);
     }
 

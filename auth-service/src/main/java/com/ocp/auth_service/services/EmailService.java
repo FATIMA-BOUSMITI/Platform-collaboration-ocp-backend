@@ -2,23 +2,46 @@ package com.ocp.auth_service.services;
 
 import com.ocp.auth_service.entity.UserCredential;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 	private final JavaMailSender mailSender;
 
+	@Value("${app.frontend.url:http://localhost:5173}")
+	private String frontendUrl;
+
+	@Value("${spring.mail.username:}")
+	private String senderAddress;
 
 	public void sendResetPasswordEmail(String email, String token) {
-
 		SimpleMailMessage message = new SimpleMailMessage();
-
 		message.setTo(email);
-		message.setSubject("Reset Password");
-		message.setText("http://localhost:5173/reset-password?token=" + token);
+		if (!senderAddress.isBlank()) {
+			message.setFrom(senderAddress);
+		}
+		message.setSubject("Réinitialisation de votre mot de passe");
+		String resetLink = UriComponentsBuilder.fromUriString(frontendUrl)
+			.pathSegment("reset-password")
+			.queryParam("token", "{token}")
+			.encode()
+			.buildAndExpand(token)
+			.toUriString();
+		message.setText("""
+			Bonjour,
+
+			Une demande de réinitialisation du mot de passe a été effectuée pour votre compte.
+			Cliquez sur le lien suivant pour choisir un nouveau mot de passe (valable 30 minutes) :
+
+			%s
+
+			Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.
+			""".formatted(resetLink));
 
 		mailSender.send(message);
 	}

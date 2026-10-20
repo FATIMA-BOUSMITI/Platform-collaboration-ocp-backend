@@ -4,13 +4,17 @@ import com.ocp.auth_service.dto.request.CreateUserRequest;
 import com.ocp.auth_service.dto.request.UpdateUserRequest;
 import com.ocp.auth_service.dto.response.RoleResponse;
 import com.ocp.auth_service.dto.response.UserResponse;
+import com.ocp.auth_service.dto.response.UserRoleAssignmentResponse;
 import com.ocp.auth_service.dto.response.UserStatsResponse;
+import com.ocp.auth_service.security.AuthenticatedUser;
 import com.ocp.auth_service.services.RoleService;
 import com.ocp.auth_service.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,6 +52,11 @@ public class UserController {
 		return ResponseEntity.ok(responses);
 	}
 
+	@GetMapping("/role-assignments")
+	public ResponseEntity<List<UserRoleAssignmentResponse>> getAllUserRoleAssignments() {
+		return ResponseEntity.ok(userService.getAllUserRoleAssignments());
+	}
+
 	@PutMapping("/{id}")
 	public ResponseEntity<UserResponse> updateUser(
 		@PathVariable UUID id,
@@ -67,6 +76,12 @@ public class UserController {
 		userService.deleteUser(id);
 		return ResponseEntity.noContent().build();
 	}
+
+	@DeleteMapping("/user/{userId}")
+	public ResponseEntity<Void> deleteUserByUserId(@PathVariable UUID userId) {
+		userService.deleteUserByUserId(userId);
+		return ResponseEntity.noContent().build();
+	}
     @GetMapping("/stats")
     public ResponseEntity<UserStatsResponse> getStats(){
         return ResponseEntity.ok(userService.getUserStats());
@@ -79,8 +94,13 @@ public class UserController {
     }
 	@GetMapping("/{userId}/roles")
 	public ResponseEntity<RoleResponse> getRolesByUserId(
-		@PathVariable UUID userId
+		@PathVariable UUID userId,
+		@AuthenticationPrincipal AuthenticatedUser authenticatedUser
 	) {
+		if (!userId.equals(authenticatedUser.userId())
+			&& !authenticatedUser.hasAdministratorRole()) {
+			throw new AccessDeniedException("Users can only read their own role");
+		}
 		return ResponseEntity.ok(
 			roleService.getRolesByUserId(userId)
 		);

@@ -10,6 +10,7 @@ import com.ocp.communication_service.repository.ConversationMemberRepository;
 import com.ocp.communication_service.repository.ConversationRepository;
 import com.ocp.communication_service.repository.MessageRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +28,27 @@ public class MessageService {
     private final MessageMapper messageMapper;
 
     @Transactional
-    public MessageResponseDTO sendMessage(UUID conversationId, SendMessageRequestDTO request) {
+    public MessageResponseDTO sendMessage(
+            UUID conversationId, SendMessageRequestDTO request, UUID authenticatedUserId) {
         if (!conversationRepository.existsById(conversationId)) {
             throw new ConversationNotFoundException(conversationId.toString());
         }
 
-        boolean isMember = conversationMemberRepository
-                .existsByConversationIdAndUserId(conversationId, request.getSenderId());
-        if (!isMember) {
+        if (authenticatedUserId != null
+                && !authenticatedUserId.equals(request.getSenderId())) {
+            throw new AccessDeniedException("The sender must match the authenticated user");
+        }
+
+        if (authenticatedUserId == null) {
+            if (!conversationMemberRepository.existsByConversationIdAndUserId(
+                    conversationId, request.getSenderId())) {
+                throw new NotConversationMemberException(
+                        request.getSenderId().toString(), conversationId.toString());
+            }
+        } else if (!conversationMemberRepository.existsByConversationIdAndUserId(
+                conversationId, authenticatedUserId)) {
             throw new NotConversationMemberException(
-                    request.getSenderId().toString(), conversationId.toString());
+                    authenticatedUserId.toString(), conversationId.toString());
         }
 
         Message message = Message.builder()
@@ -50,9 +62,15 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public List<MessageResponseDTO> getMessagesByConversation(UUID conversationId) {
+    public List<MessageResponseDTO> getMessagesByConversation(
+            UUID conversationId, UUID authenticatedUserId) {
         if (!conversationRepository.existsById(conversationId)) {
             throw new ConversationNotFoundException(conversationId.toString());
+        }
+        if (authenticatedUserId != null && !conversationMemberRepository
+                .existsByConversationIdAndUserId(conversationId, authenticatedUserId)) {
+            throw new NotConversationMemberException(
+                    authenticatedUserId.toString(), conversationId.toString());
         }
 
         return messageRepository.findByConversationIdOrderBySentAtAsc(conversationId).stream()
