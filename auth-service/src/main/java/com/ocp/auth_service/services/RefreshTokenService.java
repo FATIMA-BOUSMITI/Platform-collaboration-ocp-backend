@@ -28,14 +28,7 @@ public class RefreshTokenService {
 	private final  UserCredentialRepository userCredentialRepository;
 
 	public RefreshTokenResponse createRefreshToken(UserCredential user) {
-		List<RefreshToken> existingTokens = refreshTokenRepository.findByUser(user);
-		for (RefreshToken existingToken : existingTokens) {
-			existingToken.setRevoked(true);
-		}
-		if (!existingTokens.isEmpty()) {
-			refreshTokenRepository.saveAll(existingTokens);
-		}
-
+		// Each login owns its session; logout and administrator revocation remain explicit.
 		RefreshToken refreshToken = new RefreshToken();
 		String jwtToken = jwtService.generateRefreshToken(user);
 		refreshToken.setRefreshToken(jwtToken);
