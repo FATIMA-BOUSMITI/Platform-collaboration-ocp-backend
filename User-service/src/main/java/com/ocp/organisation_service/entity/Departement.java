@@ -22,6 +22,24 @@ public class Departement {
 	@Column(nullable = false)
 	private String name;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private java.time.LocalDateTime updatedAt;
+
+    @PrePersist
+    void initializeTimestamps() {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    void updateTimestamp() {
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
 	@Column(unique = true)
 	private String code;
 

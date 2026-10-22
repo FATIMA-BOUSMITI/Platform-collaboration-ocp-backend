@@ -10,4 +10,8 @@ import java.util.UUID;
 public class DepartementResponseDTO {
 	private UUID id;
 	private String name;
+    private String code;
+    private String description;
+    private UUID managerId;
+    private com.ocp.organisation_service.enums.DepartmentStatus status;
 }
