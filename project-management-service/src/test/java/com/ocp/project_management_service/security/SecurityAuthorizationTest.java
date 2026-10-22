@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProjectController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, SecurityAuthorizationTest.ErrorProbe.class})
 @TestPropertySource(properties = {
     "jwt.secret=qa-security-test-signing-key-with-at-least-32-bytes"
 })
@@ -52,6 +52,27 @@ class SecurityAuthorizationTest {
         mockMvc.perform(get("/api/projects")
                 .header("Authorization", bearerToken(UUID.randomUUID())))
             .andExpect(status().isOk());
+    }
+
+    @org.springframework.web.bind.annotation.RestController
+    static class ErrorProbe {
+        @org.springframework.web.bind.annotation.GetMapping("/qa-error-probe")
+        org.springframework.http.ResponseEntity<Void> error() {
+            return org.springframework.http.ResponseEntity.status(500).build();
+        }
+    }
+
+    @Test
+    void internalErrorDispatchPreservesTheErrorInsteadOfReturning401() throws Exception {
+        mockMvc.perform(get("/qa-error-probe").with(request -> {
+            request.setDispatcherType(jakarta.servlet.DispatcherType.ERROR);
+            return request;
+        })).andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void ordinaryRequestsToTheErrorProbeStillRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/qa-error-probe")).andExpect(status().isUnauthorized());
     }
 
     private String bearerToken(UUID userId) {
