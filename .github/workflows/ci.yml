@@ -54,4 +54,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image
-        run: docker build --tag platform/${{ matrix.service }}:ci ${{ matrix.service }}
+        run: docker build --tag "platform/$(echo '${{ matrix.service }}' | tr '[:upper:]' '[:lower:]'):ci" ${{ matrix.service }}
