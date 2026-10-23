@@ -10,7 +10,13 @@ import org.springframework.stereotype.Component;
  public ProjectAccessPolicy(TaskRepository tasks){this.taskRepository=tasks;}
  public boolean isInvited(UUID project,UUID user){return invitations!=null&&invitations.existsByProjectIdAndUserIdAndStatus(project,user,ProjectInvitation.Status.ACCEPTED);}
  public boolean canReadProject(Project project,AuthenticatedUser user){if(user==null||user.isAdministratorOrDirector())return true;if(isInvited(project.getId(),user.userId()))return true;if(user.isManager())return user.userId().equals(project.getResponsibleId());return user.isEmployee()&&taskRepository.existsByProjectIdAndAssigneeId(project.getId(),user.userId());}
- public List<Project> readableProjects(Collection<Project> projects,AuthenticatedUser user){return projects.stream().filter(p->canReadProject(p,user)).toList();}
+ public List<Project> readableProjects(Collection<Project> projects,AuthenticatedUser user){
+  if(user!=null&&user.isEmployee()){
+   Set<UUID> assignedProjectIds=new HashSet<>(taskRepository.findDistinctProjectIdsByAssigneeId(user.userId()));
+   return projects.stream().filter(p->assignedProjectIds.contains(p.getId())||isInvited(p.getId(),user.userId())).toList();
+  }
+  return projects.stream().filter(p->canReadProject(p,user)).toList();
+ }
  public boolean canManageProject(Project project,AuthenticatedUser user){return user==null||user.isAdministratorOrDirector()||(user.isManager()&&user.userId().equals(project.getResponsibleId()));}
  public void requireProjectRead(Project project,AuthenticatedUser user){if(!canReadProject(project,user))throw new AccessDeniedException("Project access is not permitted");}
  public void requireProjectManagement(Project project,AuthenticatedUser user){if(!canManageProject(project,user))throw new AccessDeniedException("Project management is not permitted");}
