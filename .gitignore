@@ -6,3 +6,6 @@
 .idea/
 **/target/
 *.class
+
+# Local service configuration; may contain database and third-party credentials.
+**/src/main/resources/application.properties
