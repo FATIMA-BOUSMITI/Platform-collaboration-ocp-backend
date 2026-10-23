@@ -9,52 +9,52 @@ spring:
     gateway:
       routes:
         - id: project-management-service-route
-          uri: http://localhost:8083
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/projects/**
 
         - id: task-service-route
-          uri: http://localhost:8083
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/tasks/**
 
         - id: subtask-service-route
-          uri: http://localhost:8083
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/subtasks/**
 
         - id: calendar-service-route
-          uri: http://localhost:8083
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/api/calendar/**
 
         - id: communication-service-route
-          uri: http://localhost:8089
+          uri: ${COMMUNICATION_SERVICE_URL:http://localhost:8089}
           predicates:
             - Path=/api/conversations/**
 
         - id: auth-service-route
-          uri: http://localhost:8080
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
           predicates:
             - Path=/api/auth/**
 
         - id: role-service-route
-          uri: http://localhost:8080
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
           predicates:
             - Path=/api/roles/**
 
         - id: permission-service-route
-          uri: http://localhost:8080
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
           predicates:
             - Path=/api/permissions/**
 
         - id: user-service-route
-          uri: http://localhost:8082
+          uri: ${USER_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/users/**
 
         - id: document-service-route
-          uri: http://localhost:8079
+          uri: ${DOCUMENT_SERVICE_URL:http://localhost:8079}
           predicates:
             - Path=/api/documents/**
 

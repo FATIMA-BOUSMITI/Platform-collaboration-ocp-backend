@@ -143,14 +143,22 @@ public class UserProfileServiceImpl implements UserProfileService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public UserResponseDTO getUserByAuthUserId(UUID authUserId) {
 		UserProfile user = repository.findByAuthUserId(authUserId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND,
-				"User profile not found for authentication account"
-			));
+			.orElseThrow(this::profileNotFound);
+		return toResponseWithRoles(user);
+	}
 
+	@Override
+	@Transactional
+	public UserResponseDTO getUserByAuthUserId(UUID authUserId, String authenticatedEmail) {
+		UserProfile user = repository.findByAuthUserId(authUserId)
+			.orElseGet(() -> restoreProfileLink(authUserId, authenticatedEmail));
+		return toResponseWithRoles(user);
+	}
+
+	private UserResponseDTO toResponseWithRoles(UserProfile user) {
 		List<RoleResponseDTO> roles = List.of();
 		try {
 			if (user.getAuthUserId() != null) {
@@ -163,6 +171,32 @@ public class UserProfileServiceImpl implements UserProfileService {
 		UserResponseDTO response = mapper.toResponse(user);
 		response.setRoles(roles);
 		return response;
+	}
+
+	/**
+	 * Legacy databases can contain a profile created before its authentication
+	 * account was recreated.  The email comes from the authenticated access
+	 * token, so a link is restored only for the owner of that email.
+	 */
+	private UserProfile restoreProfileLink(UUID authUserId, String authenticatedEmail) {
+		if (authenticatedEmail == null || authenticatedEmail.isBlank()) {
+			throw profileNotFound();
+		}
+
+		UserProfile profile = repository.findByEmailIgnoreCase(authenticatedEmail)
+			.orElseThrow(this::profileNotFound);
+
+		if (profile.getAuthUserId() != null && !profile.getAuthUserId().equals(authUserId)) {
+			LOGGER.info("Restoring authentication link for existing profile id={}", profile.getId());
+		}
+		profile.setAuthUserId(authUserId);
+		return repository.save(profile);
+	}
+
+	private ResponseStatusException profileNotFound() {
+		return new ResponseStatusException(
+			HttpStatus.NOT_FOUND,
+			"User profile not found for authentication account");
 	}
 
 	@Override

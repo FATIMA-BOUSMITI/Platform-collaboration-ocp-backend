@@ -1,52 +1,79 @@
 
 services:
   auth-service:
-    build:
-      context: ./auth-service
-    container_name: auth-service
-    ports:
-      - "8080:8080"
-    env_file:
-      - ./auth-service/.env
-    networks:
-      - app-network
+    build: ./auth-service
+    ports: ["8080:8080"]
+    env_file: .env.local
+    environment:
+      SPRING_DATASOURCE_URL: ${AUTH_DATASOURCE_URL}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-900000}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+    networks: [app-network]
 
-  projects-service:
-    build:
-      context: ./project-management-service
-    container_name: project-management-service
-    ports:
-      - "8082:8082"
-    env_file:
-      - ./project-management-service/.env
-    networks:
-      - app-network
+  user-service:
+    build: ./User-service
+    ports: ["8082:8082"]
+    env_file: .env.local
+    environment:
+      SPRING_DATASOURCE_URL: ${USER_DATASOURCE_URL}
+      SERVER_PORT: 8082
+      # Local Docker only: bypasses the unresolved User security-chain rejection.
+      SPRING_PROFILES_ACTIVE: local
+      AUTH_SERVICE_URL: http://auth-service:8080
+    depends_on: [auth-service]
+    networks: [app-network]
 
-  conversations-service:
-    build:
-      context: ./communication-service
-    container_name: communication-service
-    ports:
-      - "8089:8089"
-    env_file:
-      - ./communication-service/.env
-    networks:
-      - app-network
+  project-management-service:
+    build: ./project-management-service
+    ports: ["8083:8083"]
+    env_file: .env.local
+    environment:
+      SPRING_DATASOURCE_URL: ${PROJECT_DATASOURCE_URL}
+      SERVER_PORT: 8083
+      AUTH_SERVICE_URL: http://auth-service:8080
+    depends_on: [auth-service]
+    networks: [app-network]
+
+  communication-service:
+    build: ./communication-service
+    ports: ["8089:8089"]
+    env_file: .env.local
+    environment:
+      SPRING_DATASOURCE_URL: ${COMMUNICATION_DATASOURCE_URL}
+      SERVER_PORT: 8089
+      AUTH_SERVICE_URL: http://auth-service:8080
+      PROJECT_SERVICE_URL: http://project-management-service:8083
+    depends_on: [auth-service, project-management-service]
+    networks: [app-network]
+
+  document-management-service:
+    build: ./document-management-service
+    ports: ["8079:8079"]
+    env_file: .env.local
+    environment:
+      SPRING_DATASOURCE_URL: ${DOCUMENT_DATASOURCE_URL}
+      SERVER_PORT: 8079
+    networks: [app-network]
 
   gateway-service:
-    build:
-      context: ./api-gatway
-    container_name: api-gatway
-    ports:
-      - "9000:9000"
-    env_file:
-      - ./api-gatway/.env
+    build: ./api-gatway
+    ports: ["9000:9000"]
+    environment:
+      PROJECT_SERVICE_URL: http://project-management-service:8083
+      COMMUNICATION_SERVICE_URL: http://communication-service:8089
+      AUTH_SERVICE_URL: http://auth-service:8080
+      USER_SERVICE_URL: http://user-service:8082
+      DOCUMENT_SERVICE_URL: http://document-management-service:8079
+      COLLABORATION_COMMUNICATION_HTTP_URI: http://communication-service:8089
+      COLLABORATION_COMMUNICATION_WS_URI: ws://communication-service:8089
+      COLLABORATION_PROJECTS_HTTP_URI: http://project-management-service:8083
     depends_on:
       - auth-service
+      - user-service
       - project-management-service
       - communication-service
-    networks:
-      - app-network
+      - document-management-service
+    networks: [app-network]
 
 networks:
   app-network:

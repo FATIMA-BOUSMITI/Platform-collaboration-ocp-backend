@@ -17,6 +17,8 @@ public interface UserProfileService {
 
 	UserResponseDTO getUserByAuthUserId(UUID authUserId);
 
+	UserResponseDTO getUserByAuthUserId(UUID authUserId, String authenticatedEmail);
+
 	UserResponseDTO updateUser(UUID id, UserUpdateRequestDTO request);
 
 	void deleteUser(UUID id);

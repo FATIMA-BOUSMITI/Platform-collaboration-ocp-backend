@@ -14,5 +14,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, UUID> 
 
 	Optional<UserProfile> findByEmail(String email);
 
+	Optional<UserProfile> findByEmailIgnoreCase(String email);
+
 	Optional<UserProfile> findByAuthUserId(UUID authUserId);
 }

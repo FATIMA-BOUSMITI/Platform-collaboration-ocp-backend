@@ -5,12 +5,15 @@ import com.ocp.organisation_service.dto.request.UserCreateRequestDTO;
 import com.ocp.organisation_service.dto.request.UserUpdateRequestDTO;
 import com.ocp.organisation_service.dto.response.UserResponseDTO;
 import com.ocp.organisation_service.security.AuthenticatedUser;
+import com.ocp.organisation_service.security.AuthAccessClient;
 import com.ocp.organisation_service.services.UserProfileService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserProfileController {
 	private final UserProfileService service;
+	private final AuthAccessClient authAccessClient;
 
 	@PostMapping
 	public ResponseEntity<UserResponseDTO> create(@jakarta.validation.Valid @RequestBody UserCreateRequestDTO request) {
@@ -41,13 +45,27 @@ public class UserProfileController {
 	@GetMapping("/auth/{authUserId}")
 	public ResponseEntity<UserResponseDTO> getUserByAuthUserId(
 		@PathVariable UUID authUserId,
-		@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
-		if (authenticatedUser != null
-			&& !authUserId.equals(authenticatedUser.userId())
-			&& !authenticatedUser.hasAdministratorRole()) {
-			throw new AccessDeniedException("Users can only read their own profile");
+		@AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+		HttpServletRequest request) {
+		String authenticatedEmail;
+		if (authenticatedUser != null) {
+			authenticatedEmail = authenticatedUser.email();
+			if (!authUserId.equals(authenticatedUser.userId())
+				&& !authenticatedUser.hasAdministratorRole()) {
+				throw new AccessDeniedException("Users can only read their own profile");
+			}
+		} else {
+			String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+			if (authorization == null || !authorization.startsWith("Bearer ")) {
+				throw new AccessDeniedException("An access token is required");
+			}
+			AuthAccessClient.Access context = authAccessClient.resolve(authorization);
+			if (!authUserId.equals(context.userId())) {
+				throw new AccessDeniedException("Users can only read their own profile");
+			}
+			authenticatedEmail = context.email();
 		}
-		return ResponseEntity.ok(service.getUserByAuthUserId(authUserId));
+		return ResponseEntity.ok(service.getUserByAuthUserId(authUserId, authenticatedEmail));
 	}
 
 	@PutMapping("/{id}")
