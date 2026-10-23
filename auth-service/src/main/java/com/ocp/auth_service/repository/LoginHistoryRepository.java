@@ -16,9 +16,11 @@ import org.springframework.stereotype.Repository;
 public interface LoginHistoryRepository
 	extends JpaRepository<LoginHistory, UUID> {
 
+	List<LoginHistory> findTop50ByOrderByLoginDateDesc();
 	Optional<LoginHistory> findByUser(UserCredential user);
 
 	List<LoginHistory> findByUserOrderByLoginDateDesc(UserCredential user);
+	void deleteByUser(UserCredential user);
 
 	List<LoginHistory> findBySuccess(boolean success);
     long countBySuccessFalseAndLoginDateBetween(LocalDateTime start, LocalDateTime end);

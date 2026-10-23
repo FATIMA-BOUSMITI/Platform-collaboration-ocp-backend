@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+
+# Local tooling and generated build output
+.idea/
+**/target/
+*.class
+
+# Local service configuration; may contain database and third-party credentials.
+**/src/main/resources/application.properties

@@ -13,7 +13,10 @@ import java.util.UUID;
 public class CommentRequestDTO {
 
     @NotBlank(message = "Le commentaire ne peut pas être vide")
+    @jakarta.validation.constraints.Size(max=5000)
     private String content;
+    @jakarta.validation.constraints.Size(max=20)
+    private java.util.Set<@jakarta.validation.constraints.NotNull UUID> mentionIds=java.util.Set.of();
     @NotNull(message = "L'auteur du commentaire est obligatoire")
     private UUID authorId;
 }

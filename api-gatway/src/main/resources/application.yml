@@ -7,14 +7,68 @@ spring:
 
   cloud:
     gateway:
+      routes:
+        - id: project-management-service-route
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/projects/**
+
+        - id: task-service-route
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/tasks/**
+
+        - id: subtask-service-route
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/subtasks/**
+
+        - id: calendar-service-route
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/calendar/**
+
+        - id: communication-service-route
+          uri: ${COMMUNICATION_SERVICE_URL:http://localhost:8089}
+          predicates:
+            - Path=/api/conversations/**
+
+        - id: auth-service-route
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
+          predicates:
+            - Path=/api/auth/**
+
+        - id: role-service-route
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
+          predicates:
+            - Path=/api/roles/**
+
+        - id: permission-service-route
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
+          predicates:
+            - Path=/api/permissions/**
+
+        - id: user-service-route
+          uri: ${USER_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/users/**
+
+        - id: document-service-route
+          uri: ${DOCUMENT_SERVICE_URL:http://localhost:8079}
+          predicates:
+            - Path=/api/documents/**
 
       globalcors:
         add-to-simple-url-handler-mapping: true
-
         cors-configurations:
           '[/**]':
             allowedOrigins:
               - "http://localhost:5173"
+              - "http://localhost:5174"
+              - "http://localhost:5175"
+              - "http://127.0.0.1:5173"
+              - "http://127.0.0.1:5174"
+              - "http://127.0.0.1:5175"
             allowedMethods:
               - GET
               - POST
@@ -25,30 +79,6 @@ spring:
             allowedHeaders:
               - "*"
             allowCredentials: true
-
-      routes:
-
-
-
-        - id: project-management-service-route
-          uri: http://localhost:8082
-          predicates:
-            - Path=/api/projects/**
-
-        - id: communication-service-route
-          uri: http://localhost:8089
-          predicates:
-            - Path=/api/conversations/**
-
-        - id: document-service-route
-          uri: http://localhost:8079
-          predicates:
-            - Path=/api/documents/**
-
-        - id: auth-service-route
-          uri: http://localhost:8080
-          predicates:
-            - Path=/api/**
 
 eureka:
   client:

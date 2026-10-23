@@ -81,13 +81,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-
         <!-- Validation (DTO validation) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -140,11 +133,12 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>RELEASE</version>
+            <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
 
 
+		<dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>test</scope></dependency>
     </dependencies>
 
 
@@ -170,32 +164,6 @@
 
             </plugin>
 
-
-            <!-- Java Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-
-                <configuration>
-                    <annotationProcessorPaths>
-
-                        <!-- Lombok -->
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-
-                        <!-- MapStruct -->
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>1.6.3</version>
-                        </path>
-
-                    </annotationProcessorPaths>
-                </configuration>
-
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -9,6 +9,8 @@ import com.ocp.project_management_service.exception.ProjectNotFoundException;
 import com.ocp.project_management_service.mapper.CalendarEventMapper;
 import com.ocp.project_management_service.repository.CalendarEventRepository;
 import com.ocp.project_management_service.repository.ProjectRepository;
+import com.ocp.project_management_service.security.AuthenticatedUser;
+import com.ocp.project_management_service.security.ProjectAccessPolicy;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,12 +26,16 @@ public class CalendarService {
     private final CalendarEventRepository calendarEventRepository;
     private final ProjectRepository projectRepository ;
     private final CalendarEventMapper calendarEventMapper ;
+    private final ProjectAccessPolicy projectAccessPolicy;
 
     @Transactional
-    public CalendarEventDTO createEvent(UUID projectId, CalendarEventRequestDTO request){
+    public CalendarEventDTO createEvent(
+            UUID projectId, CalendarEventRequestDTO request,
+            AuthenticatedUser authenticatedUser){
         Project project = projectRepository.findById(projectId).orElseThrow(
                 ()-> new ProjectNotFoundException(projectId.toString())
         );
+        projectAccessPolicy.requireProjectManagement(project, authenticatedUser);
         CalendarEvent calendarEvent = CalendarEvent.builder()
                 .title(request.getTitle())
                 .calendarEventType(request.getType())
@@ -42,11 +48,12 @@ public class CalendarService {
     }
 
     @Transactional(readOnly = true)
-    public List<CalendarEventDTO> getProjectCalendar(UUID projectId){
+    public List<CalendarEventDTO> getProjectCalendar(
+            UUID projectId, AuthenticatedUser authenticatedUser){
 
-        if(!projectRepository.existsById(projectId)){
-            throw new ProjectNotFoundException(projectId.toString());
-        }
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId.toString()));
+        projectAccessPolicy.requireProjectRead(project, authenticatedUser);
 
         return calendarEventRepository.findByProjectIdOrderByStartAtAsc(projectId)
                 .stream()
@@ -55,11 +62,11 @@ public class CalendarService {
     }
 
     @Transactional
-    public void deleteEvent(UUID eventId){
-        if(!calendarEventRepository.existsById(eventId)){
-            throw new CalendarEventNotFoundException(eventId.toString());
-        }
-        calendarEventRepository.deleteById(eventId);
+    public void deleteEvent(UUID eventId, AuthenticatedUser authenticatedUser){
+        CalendarEvent event = calendarEventRepository.findById(eventId)
+                .orElseThrow(() -> new CalendarEventNotFoundException(eventId.toString()));
+        projectAccessPolicy.requireProjectManagement(event.getProject(), authenticatedUser);
+        calendarEventRepository.delete(event);
     }
 
 }

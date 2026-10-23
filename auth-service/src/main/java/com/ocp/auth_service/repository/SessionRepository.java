@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-
+import com.ocp.auth_service.entity.UserCredential;
 import com.ocp.auth_service.entity.Session;
 
 @Repository
@@ -17,5 +17,6 @@ public interface SessionRepository
 	Session findByDevice(String device);
 	Session findByUserAgent(String device);
     long countByActiveTrue();
+	void deleteByUser(UserCredential user);
 
 }

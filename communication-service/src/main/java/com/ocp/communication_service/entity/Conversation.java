@@ -31,6 +31,8 @@ public class Conversation {
     @Column(length = 150)
     private String name;
 
+    private UUID projectId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

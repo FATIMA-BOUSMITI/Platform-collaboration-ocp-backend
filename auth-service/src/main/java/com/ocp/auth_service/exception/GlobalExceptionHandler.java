@@ -1,6 +1,9 @@
 package com.ocp.auth_service.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 	private ResponseEntity<ErrorResponse> build(
 		HttpStatus status,
@@ -44,6 +49,30 @@ public class GlobalExceptionHandler {
 		HttpServletRequest request) {
 
 		return build(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+	}
+
+	@ExceptionHandler(UserDeletionNotAllowedException.class)
+	public ResponseEntity<ErrorResponse> handleUserDeletionNotAllowed(
+		UserDeletionNotAllowedException ex,
+		HttpServletRequest request) {
+
+		LOGGER.warn(
+			"Rejected protected-account deletion for request {}: {}",
+			request.getRequestURI(),
+			ex.getMessage());
+		return build(HttpStatus.CONFLICT, ex.getMessage(), request);
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+		DataIntegrityViolationException ex,
+		HttpServletRequest request) {
+
+		LOGGER.warn("Database integrity constraint rejected request {}", request.getRequestURI(), ex);
+		return build(
+			HttpStatus.CONFLICT,
+			"The account cannot be deleted while related records still reference it.",
+			request);
 	}
 
 	@ExceptionHandler(EmailAlreadyExistsException.class)
@@ -184,6 +213,8 @@ public class GlobalExceptionHandler {
 		);
 	}
 
+	@ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+ public ResponseEntity<ErrorResponse> handleStatus(org.springframework.web.server.ResponseStatusException ex,HttpServletRequest request){return build(HttpStatus.valueOf(ex.getStatusCode().value()),ex.getReason()==null?"Opération refusée":ex.getReason(),request);}
 	// ===========================
 	// Runtime
 	// ===========================
@@ -209,7 +240,7 @@ public class GlobalExceptionHandler {
 		Exception ex,
 		HttpServletRequest request) {
 
-		ex.printStackTrace();
+		LOGGER.error("Unhandled request failure for path {}", request.getRequestURI(), ex);
 
 		return build(
 			HttpStatus.INTERNAL_SERVER_ERROR,

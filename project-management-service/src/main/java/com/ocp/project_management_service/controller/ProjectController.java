@@ -4,11 +4,13 @@ import com.ocp.project_management_service.dto.request.ProjectRequestDTO;
 import com.ocp.project_management_service.dto.request.ProjectUpdateRequestDTO;
 import com.ocp.project_management_service.dto.response.ProjectResponseDTO;
 import com.ocp.project_management_service.entity.Project;
+import com.ocp.project_management_service.security.AuthenticatedUser;
 import com.ocp.project_management_service.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,29 +24,36 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectResponseDTO> createProject(
-            @Valid @RequestBody ProjectRequestDTO request){
-        ProjectResponseDTO response = projectService.createProject(request);
+            @Valid @RequestBody ProjectRequestDTO request,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
+        ProjectResponseDTO response = projectService.createProject(request, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectResponseDTO>> getAllProjects(){
-        List<ProjectResponseDTO> response = projectService.getAllProjects();
+    public ResponseEntity<List<ProjectResponseDTO>> getAllProjects(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
+        List<ProjectResponseDTO> response = projectService.getAllProjects(authenticatedUser);
         return ResponseEntity.ok().body(response);
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponseDTO> getProject(@PathVariable UUID id){
-        ProjectResponseDTO response = projectService.getProjectById(id);
+    public ResponseEntity<ProjectResponseDTO> getProject(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
+        ProjectResponseDTO response = projectService.getProjectById(id, authenticatedUser);
         return ResponseEntity.ok().body(response);
 
     }
 
     @GetMapping("/department/{deptId}")
-    public ResponseEntity<List<ProjectResponseDTO>> getAllProjects(@PathVariable UUID deptId){
-        List<ProjectResponseDTO> response = projectService.getProjectsByDepartment(deptId);
+    public ResponseEntity<List<ProjectResponseDTO>> getAllProjects(
+            @PathVariable UUID deptId,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
+        List<ProjectResponseDTO> response =
+                projectService.getProjectsByDepartment(deptId, authenticatedUser);
         return ResponseEntity.ok().body(response);
 
     }
@@ -52,37 +61,46 @@ public class ProjectController {
     @PutMapping("/{id}")
     public ResponseEntity<ProjectResponseDTO> updateProject(@PathVariable UUID id ,
                                                             @Valid @RequestBody
-                                                            ProjectUpdateRequestDTO request){
+                                                            ProjectUpdateRequestDTO request,
+                                                            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
 
-        ProjectResponseDTO response = projectService.updateProject(id,request);
+        ProjectResponseDTO response =
+                projectService.updateProject(id, request, authenticatedUser);
         return ResponseEntity.ok(response);
 
     }
 
 
+    public record StatusRequest(@jakarta.validation.constraints.NotNull Project.ProjectStatus status) {}
     @PatchMapping("/{id}/status")
     public ResponseEntity<ProjectResponseDTO> updateStatus(@PathVariable UUID id ,
                                                             @Valid @RequestBody
-                                                            Project.ProjectStatus status){
+                                                            StatusRequest request,
+                                                            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
 
-        ProjectResponseDTO response = projectService.updateStatus(id,status);
+        ProjectResponseDTO response =
+                projectService.updateStatus(id, request.status(), authenticatedUser);
         return ResponseEntity.ok(response);
 
     }
 
     @PostMapping("/{id}/archive")
-    public ResponseEntity<Void> archiveProject(@PathVariable UUID id ){
+    public ResponseEntity<Void> archiveProject(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
 
-        projectService.archiveProject(id);
+        projectService.archiveProject(id, authenticatedUser);
 
         return ResponseEntity.noContent().build();
 
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProject(@PathVariable UUID id ){
+    public ResponseEntity<Void> deleteProject(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser){
 
-        projectService.deleteProject(id);
+        projectService.deleteProject(id, authenticatedUser);
 
         return ResponseEntity.noContent().build();
 

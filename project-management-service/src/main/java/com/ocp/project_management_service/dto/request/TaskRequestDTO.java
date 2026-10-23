@@ -16,9 +16,11 @@ public class TaskRequestDTO {
     @NotBlank(message = "Le titre de la tâche est obligatoire")
     private String title;
     private String description;
+    private UUID columnId;
     private UUID assigneeId;
     @NotNull
     private Project.ProjectPriority priority;
     private LocalDate dueDate;
+    @jakarta.validation.constraints.PositiveOrZero
     private Long estimatedTimeMinutes; // Duration exprimée en minutes côté DTO
 }

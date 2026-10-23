@@ -10,6 +10,9 @@ import java.util.UUID;
 @Setter
 public class TaskResponseDTO {
     private UUID id;
+    private UUID columnId;
+    private long position;
+    private long version;
     private UUID projectId;
     private String title;
     private String description;

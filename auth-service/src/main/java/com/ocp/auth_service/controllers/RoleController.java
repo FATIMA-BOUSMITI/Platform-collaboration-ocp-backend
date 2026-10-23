@@ -20,7 +20,12 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class RoleController {
-	private final RoleService roleService ;
+	
+ private final RoleService roleService ;
+ @PutMapping("/permissions/batch") public void batch(@RequestBody java.util.List<RoleService.PermissionChange> changes){roleService.batch(changes);}
+ @PutMapping("/{id}") public RoleResponse edit(@PathVariable UUID id,@Valid @RequestBody CreateRoleRequest request){return roleService.editRole(id,request);}
+ @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void delete(@PathVariable UUID id){roleService.deleteRole(id);}
+
 
 	@PostMapping
 	public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody CreateRoleRequest request) {

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "user_credentials")
@@ -31,7 +32,7 @@ public class UserCredential {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", nullable =true, length = 255)
     private String passwordHash;
 
     @Column(nullable = false)
@@ -54,11 +55,8 @@ public class UserCredential {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "role_id", nullable = false)
+
+    private Role role ;
 }

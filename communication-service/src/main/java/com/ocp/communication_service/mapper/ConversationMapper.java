@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 public class ConversationMapper {
 
     public ConversationResponseDTO toResponse(Conversation conversation) {
-        return new ConversationResponseDTO(
+        ConversationResponseDTO result = new ConversationResponseDTO(
                 conversation.getId(),
                 conversation.getType().name(),
                 conversation.getName(),
                 conversation.getCreatedAt()
         );
+        result.setProjectId(conversation.getProjectId());
+        return result;
     }
 }

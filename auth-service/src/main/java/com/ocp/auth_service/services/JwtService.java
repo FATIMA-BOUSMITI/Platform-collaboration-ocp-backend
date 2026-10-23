@@ -4,11 +4,7 @@ import com.ocp.auth_service.entity.UserCredential;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -28,35 +24,18 @@ public class JwtService {
 	@Value("${jwt.refresh-expiration}")
 	private long refreshExpiration;
 
-	@Autowired
-	private ConfigurableEnvironment environment;
-
-	@PostConstruct
-	public void verifySecret() {
-
-		System.out.println("====================================");
-		System.out.println("JWT Secret = " + secret);
-		System.out.println("JWT Length = " + secret.length());
-		System.out.println("====================================");
-
-		for (PropertySource<?> ps : environment.getPropertySources()) {
-
-			Object value = ps.getProperty("jwt.secret");
-
-			if (value != null) {
-				System.out.println(ps.getName() + " ---> " + value);
-			}
-		}
-
-		System.out.println("====================================");
-	}
-
 	public String generateAccessToken(UserCredential user) {
+ return generateAccessToken(user, null);
+ }
+ public String generateAccessToken(UserCredential user, UUID sessionId) {
 
 		return Jwts.builder()
 			.subject(user.getEmail())
 			.claim("userId", user.getUserId().toString())
-			.claim("type", "ACCESS")   // <-- nouvelle ligne
+			.claim("role", user.getRole().getName())
+            .claim("sessionId", sessionId == null ? null : sessionId.toString())
+			.claim("type", "ACCESS")
+			.claim("jti", UUID.randomUUID().toString())
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + accessExpiration))
 			.signWith(getSignInKey())
@@ -69,6 +48,7 @@ public class JwtService {
 			.subject(user.getEmail())
 			.claim("userId", user.getUserId().toString())
 			.claim("type", "REFRESH")
+			.claim("jti", UUID.randomUUID().toString())
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + refreshExpiration))
 			.signWith(getSignInKey())
@@ -98,6 +78,18 @@ public class JwtService {
 
 	public boolean isTokenValid(String token) {
 		return !isTokenExpired(token);
+	}
+
+	public Claims parseAccessToken(String token) {
+		Claims claims = extractClaims(token);
+		if (!"ACCESS".equals(claims.get("type", String.class))) {
+			throw new io.jsonwebtoken.JwtException("Token is not an access token");
+		}
+		String role = claims.get("role", String.class);
+		if (claims.getSubject() == null || role == null || role.isBlank()) {
+			throw new io.jsonwebtoken.JwtException("Required access-token claims are missing");
+		}
+		return claims;
 	}
 
 	private Claims extractClaims(String token) {
