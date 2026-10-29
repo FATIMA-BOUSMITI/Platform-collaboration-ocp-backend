@@ -1,8 +1,8 @@
-# Plateforme collaborative OCP · Backend
+# OCP Collaborative Platform · Backend
 
-**Un backend Java 17 / Spring Boot organisé en microservices pour l'identité, l'organisation et les activités collaboratives.**
+**A Java 17 / Spring Boot backend built with a microservices architecture for identity management, organizational management, and collaborative activities.**
 
-Une API Gateway fournit le point d'entrée commun au frontend React. Les services prennent en charge l'authentification JWT, les utilisateurs et équipes, les projets et tâches, les échanges et les documents.
+An API Gateway provides a unified entry point for the React frontend. The services handle JWT authentication, users and teams, projects and tasks, communication, and document management.
 
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=flat-square&logo=springboot&logoColor=white)
@@ -10,133 +10,249 @@ Une API Gateway fournit le point d'entrée commun au frontend React. Les service
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?style=flat-square&logo=githubactions&logoColor=white)
 
-## Découvrir le projet
+## Explore the Project
 
-- [Architecture et responsabilités des services](docs/presentation/ARCHITECTURE.md).
-- [Configuration, build et démarrage Docker](docs/presentation/RUNNING.md).
-- [Captures et observations d'intégration API](docs/presentation/DEMONSTRATION.md).
-- [Tests transversaux et résultats QA](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA).
+- [Architecture and Service Responsibilities](docs/presentation/ARCHITECTURE.md)
+- [Configuration, Build, and Docker Setup](docs/presentation/RUNNING.md)
+- [API Integration Screenshots and Observations](docs/presentation/DEMONSTRATION.md)
+- [End-to-End Testing and QA Results](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA)
 
-## Les trois dépôts
+## The Three Repositories
 
-| Composant | Dépôt | Responsabilité |
+| Component | Repository | Responsibility |
 | --- | --- | --- |
-| Frontend | [Platform-collaboration-ocp-frontend](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-frontend) | Interfaces React, navigation et appels API |
-| Backend | [Platform-collaboration-ocp-backend](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-backend) | Services Spring Boot, authentification et persistance |
-| QA Automation | [Collaborative-Platform-QA](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA) | Selenium, Robot Framework, k6 et preuves d'exécution |
+| Frontend | [Platform-collaboration-ocp-frontend](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-frontend) | React interfaces, navigation, and API integration |
+| Backend | [Platform-collaboration-ocp-backend](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-backend) | Spring Boot services, authentication, and data persistence |
+| QA Automation | [Collaborative-Platform-QA](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA) | Selenium, Robot Framework, k6, and test execution evidence |
 
-## Services
+## Microservices Overview
 
-| Service | Répertoire | Port local | Responsabilité |
+| Service | Directory | Local Port | Responsibility |
 | --- | --- | ---: | --- |
-| API Gateway | `api-gatway/` | 9000 | Routage HTTP, CORS et accès aux services |
-| Authentification | `auth-service/` | 8080 | Connexion JWT, renouvellement, rôles, permissions et sessions |
-| Organisation | `User-service/` | 8082 | Utilisateurs, profils, départements et équipes |
-| Projets | `project-management-service/` | 8083 | Projets, tâches, sous-tâches et calendrier |
-| Communication | `communication-service/` | 8089 | Conversations, messages et temps réel |
-| Documents | `document-management-service/` | 8079 | Gestion des documents |
+| API Gateway | `api-gatway/` | 9000 | HTTP routing, CORS, and service access |
+| Authentication | `auth-service/` | 8080 | JWT authentication, token refresh, roles, permissions, and sessions |
+| Organization | `User-service/` | 8082 | Users, profiles, departments, and teams |
+| Project Management | `project-management-service/` | 8083 | Projects, tasks, subtasks, and scheduling |
+| Communication | `communication-service/` | 8089 | Conversations, messaging, and real-time communication |
+| Document Management | `document-management-service/` | 8079 | Document management |
 
-Les modules sont des projets Maven indépendants. La racine n'est pas un reactor Maven : lancer les commandes dans le module concerné ou utiliser la matrice CI.
+Each microservice is an independent Maven project.
 
-## Architecture
+The repository root is not configured as a Maven multi-module reactor. Maven commands must therefore be executed from the corresponding service directory, or through the CI matrix.
+
+## System Architecture
 
 ```mermaid
 flowchart TD
-    F[Frontend React :5173] --> G[API Gateway :9000]
-    G --> A[Auth :8080]
-    G --> U[Organisation :8082]
-    G --> P[Projets :8083]
+    F[React Frontend :5173] --> G[API Gateway :9000]
+    G --> A[Authentication :8080]
+    G --> U[Organization :8082]
+    G --> P[Project Management :8083]
     G --> C[Communication :8089]
-    G --> D[Documents :8079]
+    G --> D[Document Management :8079]
     U --> A
     P --> A
     C --> A
     C --> P
-    A --> DB[(PostgreSQL / bases configurées)]
+    A --> DB[(PostgreSQL / Configured Databases)]
     U --> DB
     P --> DB
     C --> DB
     D --> DB
 ```
 
-## Documentation API et aperçu d'intégration
+## API Documentation and Integration Overview
 
-![Documentation Swagger réelle du service d'authentification](docs/presentation/screenshots/swagger-auth-service.png)
+![Authentication Service Swagger Documentation](docs/presentation/screenshots/swagger-auth-service.png)
 
-*Documentation Swagger affichée depuis le service local avec une authentification QA réelle. Aucun appel de modification n'a été exécuté depuis cette interface.*
+*Swagger documentation displayed from the locally running authentication service using actual QA authentication credentials. No data-modifying requests were executed through this interface.*
 
-![Synthèse des réponses API réellement observées](docs/presentation/screenshots/api-observations.png)
+![Summary of Observed API Responses](docs/presentation/screenshots/api-observations.png)
 
-*Capture d'un rapport documentaire produit à partir des réponses HTTP observées pendant la démonstration QA. Ce visuel n'est pas une console serveur ni un tableau de bord de production. Les anomalies sont conservées.*
+*Screenshot of a documentation report generated from HTTP responses observed during the QA demonstration. This visual is neither a server console nor a production dashboard. Identified issues have been preserved.*
 
-Le [dossier de démonstration](docs/presentation/DEMONSTRATION.md) explique les preuves et inclut un écran du frontend consommant le backend. La réussite d'une connexion ne constitue pas une validation complète des autres services.
+The [demonstration documentation](docs/presentation/DEMONSTRATION.md) explains the supporting evidence and includes a screenshot of the frontend communicating with the backend.
 
-## Démarrage Docker
+A successful authentication request does not imply complete validation of the remaining microservices.
 
-Prérequis : Docker Desktop/Engine disponible et bases PostgreSQL accessibles avec leurs schémas et comptes adaptés.
+## Getting Started with Docker
+
+### Prerequisites
+
+- Docker Desktop or Docker Engine installed and available.
+- Accessible PostgreSQL databases.
+- Properly configured database schemas and credentials.
+
+### Clone the Repository
 
 ```powershell
 git clone https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-backend.git
+
 cd Platform-collaboration-ocp-backend
+
 Copy-Item .env.example .env.local
 ```
 
-Renseigner les paramètres privés de `.env.local`, puis :
+Configure the required private environment variables in `.env.local`.
+
+### Build and Start the Services
 
 ```powershell
 docker compose --env-file .env.local build
+
 docker compose --env-file .env.local up -d
+
 docker compose --env-file .env.local ps
 ```
 
-Le Compose construit **six images backend**. Il ne démarre pas PostgreSQL et ne contient pas le frontend. Les bases doivent être provisionnées séparément ; lancer ensuite le frontend selon [son README](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-frontend).
+Docker Compose builds **six backend images**.
 
-Les options de schéma et le profil `local` du service utilisateur nécessitent une lecture du [guide de configuration](docs/presentation/RUNNING.md) avant l'utilisation de ce Compose sur un environnement partagé.
+However, the current configuration:
 
-## Développement et tests par module
+- Does not start a PostgreSQL container.
+- Does not include the React frontend.
+- Requires databases to be provisioned separately.
 
-Exemple depuis `auth-service/` :
+Once the backend services are running, start the frontend by following its [README](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-frontend).
+
+The schema configuration options and the `local` profile used by the organization service require reviewing the [configuration guide](docs/presentation/RUNNING.md) before deploying this Compose setup in a shared environment.
+
+## Development and Module-Level Testing
+
+Each microservice can be built, tested, and started independently.
+
+Example using `auth-service/`:
 
 ```powershell
 mvn test
+
 mvn -DskipTests package
+
 mvn spring-boot:run
 ```
 
-Configurer les variables du module avant son démarrage. `-DskipTests package` produit un JAR sans valider ses tests. Les paramètres de test et besoins de base dépendent du module ; ne pas exécuter les tests contre une base métier réelle.
+Configure the required environment variables before starting the service.
 
-## CI et images
+**Important notes:**
 
-- [CI principale](.github/workflows/ci.yml) : tests et packaging Maven sur les six services, puis construction des images Docker.
-- [Workflow CI-CD historique](.github/workflows/ci-cd.yml) : matrice de quatre services avec étapes de registre. Son déclenchement cible `master`, mais ses conditions de publication vérifient `main` ; ne pas en déduire que les images sont publiées automatiquement.
+- `mvn test` executes the module's configured tests.
+- `mvn -DskipTests package` builds the application JAR without executing tests.
+- `mvn spring-boot:run` starts the Spring Boot application.
 
-Cette documentation décrit la configuration présente. Elle ne revendique pas un nouveau build Docker ni une nouvelle exécution GitHub Actions réussie.
+Testing requirements and database dependencies vary between modules.
 
-## Tests backend et dépôt QA
+Tests should never be executed against a live business database.
 
-Les tests proches des services restent dans leurs modules Java. Le **[dépôt QA](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA)** couvre les interactions Web/API et les scénarios de performance.
+## Continuous Integration and Docker Images
 
-La CI automatise l'exécution ; le dépôt QA organise les suites transversales. Les deux sont complémentaires et ne représentent pas deux versions concurrentes du même périmètre.
+The repository contains two GitHub Actions workflows.
 
-Les [résultats publiés](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA/blob/main/docs/results/README.md) concernent les suites QA identifiées et leurs dates. Ils ne constituent pas une mesure de couverture des tests Java de ce dépôt.
+### Main CI Pipeline
 
-## État de la démonstration
+[Main CI Workflow](.github/workflows/ci.yml)
 
-Pendant la session locale du 28 octobre 2026 : connexion manager et lectures d'annuaire en 200 ; compte administrateur refusé en 401 ; projets en 500 ; compteur de notifications en 404 ; profil en 200 ou 504 selon les tentatives.
+The main pipeline includes:
 
-La session utilisait des JAR déjà compilés avec Hibernate `validate` et le profil utilisateur `local` existant. Docker Desktop était indisponible. Cette session ne valide ni un déploiement Docker ni les autorisations de production, et sa concordance avec un commit backend exact n'est pas établie.
+- Maven test execution across six microservices.
+- Maven packaging.
+- Docker image builds.
 
-## Documentation
+### Legacy CI/CD Workflow
 
-- [Architecture](docs/presentation/ARCHITECTURE.md)
-- [Configuration et démarrage](docs/presentation/RUNNING.md)
-- [Démonstration commentée](docs/presentation/DEMONSTRATION.md)
-- [Contrats API collaboratifs](docs/COLLABORATION_API.md)
-- [Inventaire des endpoints](docs/ERP_ENDPOINT_INVENTORY.md)
-- [Implémentation de l'administration](docs/ADMIN_IMPLEMENTATION.md)
-- [Frontend et captures d'interface](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-frontend)
-- [QA et rapports](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA)
+[Legacy CI/CD Workflow](.github/workflows/ci-cd.yml)
+
+This workflow uses a four-service matrix and includes container registry steps.
+
+Its trigger targets the `master` branch, while its publishing conditions check the `main` branch.
+
+Therefore, the current configuration does not establish that Docker images are automatically published.
+
+**CI Status Disclaimer**
+
+This documentation describes the existing workflow configuration. It does not claim that a new Docker build or GitHub Actions execution has been successfully completed.
+
+## Backend Testing and QA Automation
+
+Backend tests located close to the application code remain within their respective Java microservices.
+
+The dedicated **[QA Automation Repository](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA)** focuses on cross-service testing, web/API interactions, and performance testing scenarios.
+
+### Testing Technologies
+
+| Technology | Testing Scope |
+| --- | --- |
+| Selenium | Web UI automation and functional testing |
+| Robot Framework | REST API testing and automated validation |
+| k6 | Performance and load testing |
+| GitHub Actions | Automated test execution within CI pipelines |
+
+### Testing Strategy
+
+The testing approach combines two complementary components:
+
+**Backend CI**
+
+Automates Maven testing, application packaging, and Docker image builds.
+
+**Dedicated QA Repository**
+
+Organizes cross-service test suites, functional scenarios, API validations, performance scripts, and execution evidence.
+
+These components complement each other and should not be interpreted as competing implementations of the same testing scope.
+
+The [published QA results](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA/blob/main/docs/results/README.md) refer to specific QA test suites and their execution dates.
+
+They do not represent a measurement of Java test coverage within this backend repository.
+
+## Demonstration Status
+
+During the local demonstration session on **October 28, 2026**, the following API behaviors were observed:
+
+| Feature | HTTP Status | Observation |
+| --- | --- | --- |
+| Manager Authentication | 200 | Successful authentication |
+| Directory Requests | 200 | Successful responses |
+| Administrator Authentication | 401 | Authentication rejected |
+| Project Requests | 500 | Internal server error |
+| Notification Counter | 404 | Resource not found |
+| User Profile | 200 / 504 | Successful response or gateway timeout, depending on the attempt |
+
+### Demonstration Environment
+
+The session used previously compiled JAR files with:
+
+- Hibernate `validate` mode.
+- The existing organization service `local` profile.
+- Docker Desktop unavailable during execution.
+
+### Limitations
+
+This demonstration does not validate:
+
+- A complete Docker deployment.
+- Production authorization rules.
+- Successful integration of every microservice.
+- An exact correspondence between the executed JAR files and a specific backend commit.
+
+The results are documented to provide transparency regarding the observed behavior and known integration issues.
+
+## Technical Documentation
+
+| Document | Description |
+| --- | --- |
+| [Architecture](docs/presentation/ARCHITECTURE.md) | Microservices architecture and responsibilities |
+| [Configuration and Setup](docs/presentation/RUNNING.md) | Environment configuration and startup instructions |
+| [Demonstration Report](docs/presentation/DEMONSTRATION.md) | API integration evidence and observations |
+| [Collaboration API Contracts](docs/COLLABORATION_API.md) | Collaborative API specifications |
+| [Endpoint Inventory](docs/ERP_ENDPOINT_INVENTORY.md) | Available backend endpoints |
+| [Administration Implementation](docs/ADMIN_IMPLEMENTATION.md) | Administration-related implementation details |
+| [Frontend Repository](https://github.com/FATIMA-BOUSMITI/Platform-collaboration-ocp-frontend) | React frontend and interface screenshots |
+| [QA Automation Repository](https://github.com/FATIMA-BOUSMITI/Collaborative-Platform-QA) | Automated testing suites and reports |
 
 ## Contributions
 
-L'historique Git documente les contributions applicatives. La présentation et les preuves de démonstration QA sont préparées par **Fatima Bousmiti**, sans attribuer tout le développement applicatif à une seule personne.
+The Git history documents the contributions made to the application.
+
+The project presentation, technical documentation, and QA demonstration evidence were prepared by **Fatima Bousmiti**.
+
+Application development contributions are documented through the repository history, without attributing the entire implementation to a single contributor.
